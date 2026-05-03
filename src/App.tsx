@@ -1,22 +1,10 @@
 import { Component, type ChangeEvent } from 'react';
 import CardList from './components/CardList';
+import { fetchFirstPagePeople } from './services/swapiPeople';
 import type { SearchResultItem } from './types/item';
 import './App.css';
 
 const SEARCH_STORAGE_KEY = 'searchQuery';
-
-const PLACEHOLDER_RESULTS: SearchResultItem[] = [
-  {
-    name: 'Sample item A',
-    description:
-      'Short sample description so the results list shows name and body text together.',
-  },
-  {
-    name: 'Sample item B',
-    description:
-      'Another line of sample text to check spacing, alignment, and readability in the list.',
-  },
-];
 
 interface AppState {
   searchInput: string;
@@ -24,18 +12,35 @@ interface AppState {
 }
 
 class App extends Component<Record<string, never>, AppState> {
+  private isUnmounted = false;
+
   state: AppState = {
     searchInput: '',
-    results: PLACEHOLDER_RESULTS,
+    results: [],
   };
 
   componentDidMount(): void {
     const savedQuery = localStorage.getItem(SEARCH_STORAGE_KEY);
+    const searchInput = savedQuery ?? '';
 
-    if (savedQuery !== null) {
-      this.setState({ searchInput: savedQuery });
-    }
+    this.setState({ searchInput });
+    void this.loadInitialPage(searchInput);
   }
+
+  componentWillUnmount(): void {
+    this.isUnmounted = true;
+  }
+
+  loadInitialPage = async (searchInputForRequest: string): Promise<void> => {
+    try {
+      const items = await fetchFirstPagePeople(searchInputForRequest);
+      if (this.isUnmounted) return;
+      this.setState({ results: items });
+    } catch {
+      if (this.isUnmounted) return;
+      this.setState({ results: [] });
+    }
+  };
 
   handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
     this.setState({ searchInput: event.target.value });
