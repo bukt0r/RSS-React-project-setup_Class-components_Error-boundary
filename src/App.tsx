@@ -1,15 +1,32 @@
 import { Component, type ChangeEvent } from 'react';
+import CardList from './components/CardList';
+import type { SearchResultItem } from './types/item';
 import './App.css';
 
 const SEARCH_STORAGE_KEY = 'searchQuery';
 
+const PLACEHOLDER_RESULTS: SearchResultItem[] = [
+  {
+    name: 'Sample item A',
+    description:
+      'Short sample description so the results list shows name and body text together.',
+  },
+  {
+    name: 'Sample item B',
+    description:
+      'Another line of sample text to check spacing, alignment, and readability in the list.',
+  },
+];
+
 interface AppState {
   searchInput: string;
+  results: SearchResultItem[];
 }
 
 class App extends Component<Record<string, never>, AppState> {
   state: AppState = {
     searchInput: '',
+    results: PLACEHOLDER_RESULTS,
   };
 
   componentDidMount(): void {
@@ -42,7 +59,7 @@ class App extends Component<Record<string, never>, AppState> {
 
         <section className="results-section" aria-label="Results section">
           <h2>Results</h2>
-          <p>Search results will be displayed here.</p>
+          <CardList items={this.state.results} />
         </section>
       </main>
     );
