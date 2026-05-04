@@ -1,5 +1,6 @@
 import { Component, type ChangeEvent } from 'react';
 import CardList from './components/CardList';
+import ErrorBanner from './components/ErrorBanner';
 import LoadingSpinner from './components/LoadingSpinner';
 import { readStoredSearchRaw, writeStoredSearchTrimmed } from './services/searchStorage';
 import { fetchFirstPagePeople, SwapiHttpError } from './services/swapiPeople';
@@ -41,7 +42,7 @@ class App extends Component<Record<string, never>, AppState> {
     const trimmed = searchInputForRequest.trim();
 
     if (!this.isUnmounted) {
-      this.setState({ isLoading: true });
+      this.setState({ isLoading: true, fetchError: null });
     }
 
     try {
@@ -79,7 +80,7 @@ class App extends Component<Record<string, never>, AppState> {
 
   submitSearch = async (trimmed: string): Promise<void> => {
     if (!this.isUnmounted) {
-      this.setState({ isLoading: true });
+      this.setState({ isLoading: true, fetchError: null });
     }
 
     try {
@@ -127,11 +128,7 @@ class App extends Component<Record<string, never>, AppState> {
 
         <section className="results-section" aria-label="Results section">
           <h2>Results</h2>
-          {this.state.fetchError ? (
-            <p className="results-error" role="alert">
-              {this.state.fetchError}
-            </p>
-          ) : null}
+          <ErrorBanner message={this.state.fetchError} />
           <div className="results-section__panel">
             {this.state.isLoading ? (
               <div
