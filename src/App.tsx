@@ -1,6 +1,7 @@
 import { Component, type ChangeEvent } from 'react';
 import CardList from './components/CardList';
 import ErrorBanner from './components/ErrorBanner';
+import ErrorSpike from './components/ErrorSpike';
 import LoadingSpinner from './components/LoadingSpinner';
 import { readStoredSearchRaw, writeStoredSearchTrimmed } from './services/searchStorage';
 import { fetchFirstPagePeople, SwapiHttpError } from './services/swapiPeople';
@@ -12,6 +13,7 @@ interface AppState {
   results: SearchResultItem[];
   isLoading: boolean;
   fetchError: string | null;
+  simulateCrash: boolean;
 }
 
 class App extends Component<Record<string, never>, AppState> {
@@ -24,6 +26,7 @@ class App extends Component<Record<string, never>, AppState> {
     results: [],
     isLoading: false,
     fetchError: null,
+    simulateCrash: false,
   };
 
   componentDidMount(): void {
@@ -76,6 +79,10 @@ class App extends Component<Record<string, never>, AppState> {
     }
 
     void this.submitSearch(trimmed);
+  };
+
+  handleTestErrorClick = (): void => {
+    this.setState({ simulateCrash: true });
   };
 
   submitSearch = async (trimmed: string): Promise<void> => {
@@ -144,6 +151,14 @@ class App extends Component<Record<string, never>, AppState> {
             </div>
           </div>
         </section>
+
+        <div className="app-test-error">
+          <button type="button" onClick={this.handleTestErrorClick}>
+            Test error
+          </button>
+        </div>
+
+        {this.state.simulateCrash ? <ErrorSpike /> : null}
       </main>
     );
   }
