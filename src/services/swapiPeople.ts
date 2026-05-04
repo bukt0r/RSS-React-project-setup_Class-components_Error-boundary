@@ -1,6 +1,6 @@
 import type { SearchResultItem } from '../types/item';
 
-const SWAPI_PEOPLE_URL = 'https://swapi.dev/api/people/';
+const SWAPI_PEOPLE_URL = 'https://swapi.py4e.com/api/people/';
 
 export class SwapiHttpError extends Error {
   readonly status: number;
