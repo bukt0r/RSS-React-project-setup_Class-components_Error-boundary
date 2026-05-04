@@ -1,6 +1,6 @@
 import { Component, type ChangeEvent } from 'react';
 import CardList from './components/CardList';
-import { readStoredSearchRaw } from './services/searchStorage';
+import { readStoredSearchRaw, writeStoredSearchTrimmed } from './services/searchStorage';
 import { fetchFirstPagePeople } from './services/swapiPeople';
 import type { SearchResultItem } from './types/item';
 import './App.css';
@@ -65,6 +65,7 @@ class App extends Component<Record<string, never>, AppState> {
       const items = await fetchFirstPagePeople(trimmed);
       if (this.isUnmounted) return;
       this.lastFetchedTrimmedQuery = trimmed;
+      writeStoredSearchTrimmed(trimmed);
       this.setState({ results: items, searchInput: trimmed });
     } catch {
       if (this.isUnmounted) return;
