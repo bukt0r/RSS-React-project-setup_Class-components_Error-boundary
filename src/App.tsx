@@ -14,6 +14,8 @@ interface AppState {
 class App extends Component<Record<string, never>, AppState> {
   private isUnmounted = false;
 
+  private lastFetchedTrimmedQuery: string | null = null;
+
   state: AppState = {
     searchInput: '',
     results: [],
@@ -32,9 +34,12 @@ class App extends Component<Record<string, never>, AppState> {
   }
 
   loadInitialPage = async (searchInputForRequest: string): Promise<void> => {
+    const trimmed = searchInputForRequest.trim();
+
     try {
       const items = await fetchFirstPagePeople(searchInputForRequest);
       if (this.isUnmounted) return;
+      this.lastFetchedTrimmedQuery = trimmed;
       this.setState({ results: items });
     } catch {
       if (this.isUnmounted) return;
@@ -44,6 +49,28 @@ class App extends Component<Record<string, never>, AppState> {
 
   handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
     this.setState({ searchInput: event.target.value });
+  };
+
+  handleSearchClick = (): void => {
+    const trimmed = this.state.searchInput.trim();
+
+    if (trimmed === this.lastFetchedTrimmedQuery) {
+      return;
+    }
+
+    void this.submitSearch(trimmed);
+  };
+
+  submitSearch = async (trimmed: string): Promise<void> => {
+    try {
+      const items = await fetchFirstPagePeople(trimmed);
+      if (this.isUnmounted) return;
+      this.lastFetchedTrimmedQuery = trimmed;
+      this.setState({ results: items, searchInput: trimmed });
+    } catch {
+      if (this.isUnmounted) return;
+      this.setState({ results: [] });
+    }
   };
 
   render() {
@@ -58,7 +85,9 @@ class App extends Component<Record<string, never>, AppState> {
               value={this.state.searchInput}
               onChange={this.handleSearchInputChange}
             />
-            <button type="button">Search</button>
+            <button type="button" onClick={this.handleSearchClick}>
+              Search
+            </button>
           </div>
         </section>
 
