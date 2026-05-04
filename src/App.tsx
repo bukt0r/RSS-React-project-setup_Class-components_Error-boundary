@@ -1,10 +1,9 @@
 import { Component, type ChangeEvent } from 'react';
 import CardList from './components/CardList';
+import { readStoredSearchRaw } from './services/searchStorage';
 import { fetchFirstPagePeople } from './services/swapiPeople';
 import type { SearchResultItem } from './types/item';
 import './App.css';
-
-const SEARCH_STORAGE_KEY = 'searchQuery';
 
 interface AppState {
   searchInput: string;
@@ -22,7 +21,7 @@ class App extends Component<Record<string, never>, AppState> {
   };
 
   componentDidMount(): void {
-    const savedQuery = localStorage.getItem(SEARCH_STORAGE_KEY);
+    const savedQuery = readStoredSearchRaw();
     const searchInput = savedQuery ?? '';
 
     this.setState({ searchInput });
