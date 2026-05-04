@@ -72,6 +72,10 @@ class App extends Component<Record<string, never>, AppState> {
   };
 
   submitSearch = async (trimmed: string): Promise<void> => {
+    if (!this.isUnmounted) {
+      this.setState({ isLoading: true });
+    }
+
     try {
       const items = await fetchFirstPagePeople(trimmed);
       if (this.isUnmounted) return;
@@ -81,6 +85,10 @@ class App extends Component<Record<string, never>, AppState> {
     } catch {
       if (this.isUnmounted) return;
       this.setState({ results: [] });
+    } finally {
+      if (!this.isUnmounted) {
+        this.setState({ isLoading: false });
+      }
     }
   };
 
@@ -95,6 +103,7 @@ class App extends Component<Record<string, never>, AppState> {
               placeholder="Enter item name"
               value={this.state.searchInput}
               onChange={this.handleSearchInputChange}
+              disabled={this.state.isLoading}
             />
             <button
               type="button"
