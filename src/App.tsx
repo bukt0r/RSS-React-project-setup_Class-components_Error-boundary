@@ -1,5 +1,6 @@
 import { Component, type ChangeEvent } from 'react';
 import CardList from './components/CardList';
+import LoadingSpinner from './components/LoadingSpinner';
 import { readStoredSearchRaw, writeStoredSearchTrimmed } from './services/searchStorage';
 import { fetchFirstPagePeople } from './services/swapiPeople';
 import type { SearchResultItem } from './types/item';
@@ -8,6 +9,7 @@ import './App.css';
 interface AppState {
   searchInput: string;
   results: SearchResultItem[];
+  isLoading: boolean;
 }
 
 class App extends Component<Record<string, never>, AppState> {
@@ -18,6 +20,7 @@ class App extends Component<Record<string, never>, AppState> {
   state: AppState = {
     searchInput: '',
     results: [],
+    isLoading: false,
   };
 
   componentDidMount(): void {
@@ -35,6 +38,10 @@ class App extends Component<Record<string, never>, AppState> {
   loadInitialPage = async (searchInputForRequest: string): Promise<void> => {
     const trimmed = searchInputForRequest.trim();
 
+    if (!this.isUnmounted) {
+      this.setState({ isLoading: true });
+    }
+
     try {
       const items = await fetchFirstPagePeople(searchInputForRequest);
       if (this.isUnmounted) return;
@@ -43,6 +50,10 @@ class App extends Component<Record<string, never>, AppState> {
     } catch {
       if (this.isUnmounted) return;
       this.setState({ results: [] });
+    } finally {
+      if (!this.isUnmounted) {
+        this.setState({ isLoading: false });
+      }
     }
   };
 
@@ -85,7 +96,11 @@ class App extends Component<Record<string, never>, AppState> {
               value={this.state.searchInput}
               onChange={this.handleSearchInputChange}
             />
-            <button type="button" onClick={this.handleSearchClick}>
+            <button
+              type="button"
+              onClick={this.handleSearchClick}
+              disabled={this.state.isLoading}
+            >
               Search
             </button>
           </div>
@@ -93,7 +108,20 @@ class App extends Component<Record<string, never>, AppState> {
 
         <section className="results-section" aria-label="Results section">
           <h2>Results</h2>
-          <CardList items={this.state.results} />
+          <div className="results-section__panel">
+            {this.state.isLoading ? (
+              <div
+                className="results-section__overlay"
+                aria-busy="true"
+                aria-label="Loading results"
+              >
+                <LoadingSpinner label="Loading results" />
+              </div>
+            ) : null}
+            <div className="results-section__body">
+              <CardList items={this.state.results} />
+            </div>
+          </div>
         </section>
       </main>
     );
