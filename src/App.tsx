@@ -2,7 +2,7 @@ import { Component, type ChangeEvent } from 'react';
 import CardList from './components/CardList';
 import LoadingSpinner from './components/LoadingSpinner';
 import { readStoredSearchRaw, writeStoredSearchTrimmed } from './services/searchStorage';
-import { fetchFirstPagePeople } from './services/swapiPeople';
+import { fetchFirstPagePeople, SwapiHttpError } from './services/swapiPeople';
 import type { SearchResultItem } from './types/item';
 import './App.css';
 
@@ -10,6 +10,7 @@ interface AppState {
   searchInput: string;
   results: SearchResultItem[];
   isLoading: boolean;
+  fetchError: string | null;
 }
 
 class App extends Component<Record<string, never>, AppState> {
@@ -21,6 +22,7 @@ class App extends Component<Record<string, never>, AppState> {
     searchInput: '',
     results: [],
     isLoading: false,
+    fetchError: null,
   };
 
   componentDidMount(): void {
@@ -46,10 +48,14 @@ class App extends Component<Record<string, never>, AppState> {
       const items = await fetchFirstPagePeople(searchInputForRequest);
       if (this.isUnmounted) return;
       this.lastFetchedTrimmedQuery = trimmed;
-      this.setState({ results: items });
-    } catch {
+      this.setState({ results: items, fetchError: null });
+    } catch (error: unknown) {
       if (this.isUnmounted) return;
-      this.setState({ results: [] });
+      const fetchError =
+        error instanceof SwapiHttpError
+          ? error.message
+          : 'Unable to load data. Please try again.';
+      this.setState({ results: [], fetchError });
     } finally {
       if (!this.isUnmounted) {
         this.setState({ isLoading: false });
@@ -81,10 +87,14 @@ class App extends Component<Record<string, never>, AppState> {
       if (this.isUnmounted) return;
       this.lastFetchedTrimmedQuery = trimmed;
       writeStoredSearchTrimmed(trimmed);
-      this.setState({ results: items, searchInput: trimmed });
-    } catch {
+      this.setState({ results: items, searchInput: trimmed, fetchError: null });
+    } catch (error: unknown) {
       if (this.isUnmounted) return;
-      this.setState({ results: [] });
+      const fetchError =
+        error instanceof SwapiHttpError
+          ? error.message
+          : 'Unable to load data. Please try again.';
+      this.setState({ results: [], fetchError });
     } finally {
       if (!this.isUnmounted) {
         this.setState({ isLoading: false });
@@ -117,6 +127,11 @@ class App extends Component<Record<string, never>, AppState> {
 
         <section className="results-section" aria-label="Results section">
           <h2>Results</h2>
+          {this.state.fetchError ? (
+            <p className="results-error" role="alert">
+              {this.state.fetchError}
+            </p>
+          ) : null}
           <div className="results-section__panel">
             {this.state.isLoading ? (
               <div
