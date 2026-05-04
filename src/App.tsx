@@ -33,7 +33,8 @@ class App extends Component<Record<string, never>, AppState> {
     const savedQuery = readStoredSearchRaw();
     const searchInput = savedQuery ?? '';
 
-    this.setState({ searchInput });
+    this.setState((prevState) => ({...prevState, searchInput: searchInput}));
+    console.log('app component didMount', this.state)
     void this.loadInitialPage(searchInput);
   }
 
@@ -44,31 +45,33 @@ class App extends Component<Record<string, never>, AppState> {
   loadInitialPage = async (searchInputForRequest: string): Promise<void> => {
     const trimmed = searchInputForRequest.trim();
 
-    if (!this.isUnmounted) {
-      this.setState({ isLoading: true, fetchError: null });
-    }
+    // if (!this.isUnmounted) {
+    //   this.setState({ isLoading: true, fetchError: null });
+    // }
 
     try {
+      console.log('SEARCH', searchInputForRequest);
       const items = await fetchFirstPagePeople(searchInputForRequest);
-      if (this.isUnmounted) return;
+      console.log(items)
+      // if (this.isUnmounted) return;
       this.lastFetchedTrimmedQuery = trimmed;
-      this.setState({ results: items, fetchError: null });
+      this.setState((prevState) => ({...prevState, results: items, fetchError: null}));
     } catch (error: unknown) {
       if (this.isUnmounted) return;
       const fetchError =
         error instanceof SwapiHttpError
           ? error.message
           : 'Unable to load data. Please try again.';
-      this.setState({ results: [], fetchError });
+      this.setState((prevState) => ({...prevState, results: [], fetchError}));
     } finally {
-      if (!this.isUnmounted) {
-        this.setState({ isLoading: false });
-      }
+      // if (!this.isUnmounted) {
+        this.setState((prevState)=> ({...prevState, isLoading: false}));
+      // }
     }
   };
 
   handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    this.setState({ searchInput: event.target.value });
+    this.setState((prevState) => ({...prevState ,searchInput: event.target.value}));
   };
 
   handleSearchClick = (): void => {
@@ -82,35 +85,36 @@ class App extends Component<Record<string, never>, AppState> {
   };
 
   handleTestErrorClick = (): void => {
-    this.setState({ simulateCrash: true });
+    this.setState((prevState) => ({...prevState,  simulateCrash: true}));
   };
 
   submitSearch = async (trimmed: string): Promise<void> => {
-    if (!this.isUnmounted) {
-      this.setState({ isLoading: true, fetchError: null });
-    }
+    // if (!this.isUnmounted) {
+    //   this.setState((prevState)=> ({...prevState, isLoading: true, fetchError: null}));
+    // }
 
     try {
       const items = await fetchFirstPagePeople(trimmed);
       if (this.isUnmounted) return;
       this.lastFetchedTrimmedQuery = trimmed;
       writeStoredSearchTrimmed(trimmed);
-      this.setState({ results: items, searchInput: trimmed, fetchError: null });
+      this.setState((prevState) => ({...prevState, results: items, searchInput: trimmed, fetchError: null}));
     } catch (error: unknown) {
       if (this.isUnmounted) return;
       const fetchError =
         error instanceof SwapiHttpError
           ? error.message
           : 'Unable to load data. Please try again.';
-      this.setState({ results: [], fetchError });
+      this.setState((prevState) => ({...prevState, results: [], fetchError}));
     } finally {
-      if (!this.isUnmounted) {
-        this.setState({ isLoading: false });
-      }
+      // if (!this.isUnmounted) {
+      this.setState((prevState)=> ({...prevState, isLoading: false}));
+      // }
     }
   };
 
   render() {
+    console.log('STATE!!!',this.state.results);
     return (
       <main className="app-layout">
         <section className="search-section" aria-label="Search section">
