@@ -5,6 +5,28 @@
   padding: 24px;
 }
 
+.app-test-error {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+.app-test-error button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.app-test-error button:hover {
+  border-color: var(--accent-border);
+  color: var(--text-h);
+}
+
 .search-section,
 .results-section {
   border: 1px solid var(--border);
