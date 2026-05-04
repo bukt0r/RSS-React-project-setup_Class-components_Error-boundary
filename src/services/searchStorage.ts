@@ -5,5 +5,9 @@ export function readStoredSearchRaw(): string | null {
 }
 
 export function writeStoredSearchTrimmed(trimmed: string): void {
+  if (localStorage.getItem(SEARCH_STORAGE_KEY) === trimmed) {
+    return;
+  }
+
   localStorage.setItem(SEARCH_STORAGE_KEY, trimmed);
 }
