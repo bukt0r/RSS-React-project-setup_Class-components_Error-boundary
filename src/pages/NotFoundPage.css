@@ -1,0 +1,30 @@
+.not-found-page {
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.not-found-page h1 {
+  margin: 0 0 12px;
+  font-size: 3rem;
+  color: var(--text-h);
+}
+
+.not-found-page__message {
+  margin: 0 0 24px;
+}
+
+.not-found-page__link {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  text-decoration: none;
+}
+
+.not-found-page__link:hover {
+  border-color: var(--accent-border);
+}

@@ -1,171 +1,30 @@
-import { Component, type ChangeEvent } from 'react';
-import CardList from './components/CardList';
-import ErrorBanner from './components/ErrorBanner';
-import ErrorSpike from './components/ErrorSpike';
-import LoadingSpinner from './components/LoadingSpinner';
-import { readStoredSearchRaw, writeStoredSearchTrimmed } from './services/searchStorage';
-import { fetchFirstPagePeople, SwapiHttpError } from './services/swapiPeople';
-import type { SearchResultItem } from './types/item';
+import { NavLink, Route, Routes } from 'react-router-dom';
+import AboutPage from './pages/AboutPage';
+import HomePage from './pages/HomePage';
+import NotFoundPage from './pages/NotFoundPage';
 import './App.css';
 
-interface AppState {
-  searchInput: string;
-  results: SearchResultItem[];
-  isLoading: boolean;
-  fetchError: string | null;
-  simulateCrash: boolean;
-}
+function App() {
+  return (
+    <div className="app-shell">
+      <header className="app-header">
+        <nav className="app-nav" aria-label="Main navigation">
+          <NavLink to="/" end className="app-nav__link">
+            Search
+          </NavLink>
+          <NavLink to="/about" className="app-nav__link">
+            About
+          </NavLink>
+        </nav>
+      </header>
 
-class App extends Component<Record<string, never>, AppState> {
-  private isUnmounted = false;
-
-  private lastFetchedTrimmedQuery: string | null = null;
-
-  state: AppState = {
-    searchInput: '',
-    results: [],
-    isLoading: false,
-    fetchError: null,
-    simulateCrash: false,
-  };
-
-  componentDidMount(): void {
-    const savedQuery = readStoredSearchRaw();
-    const searchInput = savedQuery ?? '';
-
-    this.setState((prevState) => ({...prevState, searchInput: searchInput}));
-    console.log('app component didMount', this.state)
-    void this.loadInitialPage(searchInput);
-  }
-
-  componentWillUnmount(): void {
-    this.isUnmounted = true;
-  }
-
-  loadInitialPage = async (searchInputForRequest: string): Promise<void> => {
-    const trimmed = searchInputForRequest.trim();
-
-    // if (!this.isUnmounted) {
-    //   this.setState({ isLoading: true, fetchError: null });
-    // }
-
-    try {
-      console.log('SEARCH', searchInputForRequest);
-      const items = await fetchFirstPagePeople(searchInputForRequest);
-      console.log(items)
-      // if (this.isUnmounted) return;
-      this.lastFetchedTrimmedQuery = trimmed;
-      this.setState((prevState) => ({...prevState, results: items, fetchError: null}));
-    } catch (error: unknown) {
-      if (this.isUnmounted) return;
-      const fetchError =
-        error instanceof SwapiHttpError
-          ? error.message
-          : 'Unable to load data. Please try again.';
-      this.setState((prevState) => ({...prevState, results: [], fetchError}));
-    } finally {
-      // if (!this.isUnmounted) {
-        this.setState((prevState)=> ({...prevState, isLoading: false}));
-      // }
-    }
-  };
-
-  handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    this.setState((prevState) => ({...prevState ,searchInput: event.target.value}));
-  };
-
-  handleSearchClick = (): void => {
-    const trimmed = this.state.searchInput.trim();
-
-    if (trimmed === this.lastFetchedTrimmedQuery) {
-      return;
-    }
-
-    void this.submitSearch(trimmed);
-  };
-
-  handleTestErrorClick = (): void => {
-    this.setState((prevState) => ({...prevState,  simulateCrash: true}));
-  };
-
-  submitSearch = async (trimmed: string): Promise<void> => {
-    // if (!this.isUnmounted) {
-    //   this.setState((prevState)=> ({...prevState, isLoading: true, fetchError: null}));
-    // }
-
-    try {
-      const items = await fetchFirstPagePeople(trimmed);
-      if (this.isUnmounted) return;
-      this.lastFetchedTrimmedQuery = trimmed;
-      writeStoredSearchTrimmed(trimmed);
-      this.setState((prevState) => ({...prevState, results: items, searchInput: trimmed, fetchError: null}));
-    } catch (error: unknown) {
-      if (this.isUnmounted) return;
-      const fetchError =
-        error instanceof SwapiHttpError
-          ? error.message
-          : 'Unable to load data. Please try again.';
-      this.setState((prevState) => ({...prevState, results: [], fetchError}));
-    } finally {
-      // if (!this.isUnmounted) {
-      this.setState((prevState)=> ({...prevState, isLoading: false}));
-      // }
-    }
-  };
-
-  render() {
-    console.log('STATE!!!',this.state.results);
-    return (
-      <main className="app-layout">
-        <section className="search-section" aria-label="Search section">
-          <h1>Item Search</h1>
-          <div className="search-controls">
-            <input
-              type="text"
-              placeholder="Enter item name"
-              value={this.state.searchInput}
-              onChange={this.handleSearchInputChange}
-              disabled={this.state.isLoading}
-            />
-            <button
-              type="button"
-              onClick={this.handleSearchClick}
-              disabled={this.state.isLoading}
-            >
-              Search
-            </button>
-          </div>
-        </section>
-
-        <section className="results-section" aria-label="Results section">
-          <h2>Results</h2>
-          <ErrorBanner message={this.state.fetchError} />
-          <div className="results-section__panel">
-            {this.state.isLoading ? (
-              <div
-                className="results-section__overlay"
-                aria-busy="true"
-                aria-label="Loading results"
-              >
-                <LoadingSpinner label="Loading results" />
-              </div>
-            ) : null}
-            <div className="results-section__body">
-              <CardList items={this.state.results} />
-            </div>
-          </div>
-        </section>
-
-        <div className="app-test-error">
-          <button type="button" onClick={this.handleTestErrorClick}>
-            Test error
-          </button>
-        </div>
-
-        {this.state.simulateCrash ? <ErrorSpike /> : null}
-      </main>
-    );
-  }
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </div>
+  );
 }
 
 export default App;

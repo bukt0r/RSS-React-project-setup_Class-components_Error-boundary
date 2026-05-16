@@ -1,3 +1,40 @@
+.app-shell {
+  box-sizing: border-box;
+  max-width: 1126px;
+  margin: 0 auto;
+  min-height: 100svh;
+  padding: 24px;
+  border-inline: 1px solid var(--border);
+}
+
+.app-header {
+  margin-bottom: 16px;
+}
+
+.app-nav {
+  display: flex;
+  gap: 16px;
+}
+
+.app-nav__link {
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.app-nav__link:hover {
+  color: var(--text-h);
+  background: var(--social-bg);
+}
+
+.app-nav__link.active {
+  color: var(--text-h);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+}
+
 .app-layout {
   display: flex;
   flex-direction: column;

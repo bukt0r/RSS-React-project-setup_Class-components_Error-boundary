@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import App from './App';
+import HomePage from './pages/HomePage';
 import { fetchFirstPagePeople } from './services/swapiPeople';
 import {
   readStoredSearchRaw,
@@ -17,7 +17,7 @@ vi.mock('./services/searchStorage', () => ({
   writeStoredSearchTrimmed: vi.fn(),
 }));
 
-describe('App', () => {
+describe('HomePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(console, 'log').mockImplementation(() => undefined);
@@ -34,7 +34,7 @@ describe('App', () => {
       { name: 'Luke Skywalker', description: 'Jedi' },
     ]);
 
-    render(<App />);
+    render(<HomePage />);
 
     await waitFor(() => {
       expect(fetchFirstPagePeople).toHaveBeenCalledWith('Luke');
@@ -52,7 +52,7 @@ describe('App', () => {
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([{ name: 'Leia Organa', description: 'Leader' }]);
 
-    render(<App />);
+    render(<HomePage />);
 
     const input = screen.getByPlaceholderText('Enter item name');
     await user.clear(input);
