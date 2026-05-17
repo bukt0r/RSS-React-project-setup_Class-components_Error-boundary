@@ -1,11 +1,16 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import HomePage from './pages/HomePage';
+import { useSearchStorage } from './hooks/useSearchStorage';
 import { fetchFirstPagePeople } from './services/swapiPeople';
 
 vi.mock('./services/swapiPeople', () => ({
   fetchFirstPagePeople: vi.fn(),
   SwapiHttpError: class SwapiHttpError extends Error {},
+}));
+
+vi.mock('./hooks/useSearchStorage', () => ({
+  useSearchStorage: vi.fn(),
 }));
 
 describe('HomePage', () => {
@@ -14,16 +19,15 @@ describe('HomePage', () => {
   });
 
   it('loads initial data using query restored from storage', async () => {
+    vi.mocked(useSearchStorage).mockReturnValue({
+      readStoredSearch: () => 'Luke',
+      saveTrimmedSearch: vi.fn(),
+    });
     vi.mocked(fetchFirstPagePeople).mockResolvedValue([
       { name: 'Luke Skywalker', description: 'Jedi' },
     ]);
 
-    render(
-      <HomePage
-        readStoredSearch={() => 'Luke'}
-        saveTrimmedSearch={vi.fn()}
-      />,
-    );
+    render(<HomePage />);
 
     await waitFor(() => {
       expect(fetchFirstPagePeople).toHaveBeenCalledWith('Luke');
@@ -37,16 +41,15 @@ describe('HomePage', () => {
   it('submits trimmed query, persists it and renders results', async () => {
     const user = userEvent.setup();
     const saveTrimmedSearch = vi.fn();
+    vi.mocked(useSearchStorage).mockReturnValue({
+      readStoredSearch: () => null,
+      saveTrimmedSearch,
+    });
     vi.mocked(fetchFirstPagePeople)
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([{ name: 'Leia Organa', description: 'Leader' }]);
 
-    render(
-      <HomePage
-        readStoredSearch={() => null}
-        saveTrimmedSearch={saveTrimmedSearch}
-      />,
-    );
+    render(<HomePage />);
 
     const input = screen.getByPlaceholderText('Enter item name');
     await user.clear(input);

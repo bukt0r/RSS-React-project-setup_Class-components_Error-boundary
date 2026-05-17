@@ -1,6 +1,6 @@
 import { NavLink, Route, Routes } from 'react-router-dom';
 import AboutPage from './pages/AboutPage';
-import HomePageContainer from './pages/HomePageContainer';
+import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
 import './App.css';
 
@@ -19,7 +19,7 @@ function App() {
       </header>
 
       <Routes>
-        <Route path="/" element={<HomePageContainer />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
