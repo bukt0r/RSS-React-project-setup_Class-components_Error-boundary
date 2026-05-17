@@ -115,6 +115,20 @@ export async function fetchPeoplePage(
   };
 }
 
+export async function fetchPersonById(id: string): Promise<SearchResultItem> {
+  const response = await fetch(`${SWAPI_PEOPLE_URL}${id}/`);
+
+  if (!response.ok) {
+    throw new SwapiHttpError(
+      response.status,
+      messageForHttpStatus(response.status),
+    );
+  }
+
+  const person = (await response.json()) as SwapiPerson;
+  return personToItem(person);
+}
+
 export async function fetchFirstPagePeople(
   searchFromInput: string,
 ): Promise<SearchResultItem[]> {

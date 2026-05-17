@@ -3,9 +3,11 @@ import type { SearchResultItem } from '../types/item';
 
 interface CardListProps {
   items: SearchResultItem[];
+  selectedId: string | null;
+  onItemSelect: (id: string) => void;
 }
 
-function CardList({ items }: CardListProps) {
+function CardList({ items, selectedId, onItemSelect }: CardListProps) {
   if (items.length === 0) {
     return (
       <p className="results-empty" role="status">
@@ -18,7 +20,11 @@ function CardList({ items }: CardListProps) {
     <ul className="result-list">
       {items.map((item, index) => (
         <li key={`${item.name}-${index}`} className="result-list__item">
-          <Card item={item} />
+          <Card
+            item={item}
+            isSelected={selectedId === item.id}
+            onSelect={onItemSelect}
+          />
         </li>
       ))}
     </ul>

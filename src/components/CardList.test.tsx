@@ -3,7 +3,9 @@ import CardList from './CardList';
 
 describe('CardList', () => {
   it('shows empty state when items array is empty', () => {
-    render(<CardList items={[]} />);
+    render(
+      <CardList items={[]} selectedId={null} onItemSelect={vi.fn()} />,
+    );
 
     expect(screen.getByRole('status')).toBeInTheDocument();
     expect(screen.getByText('No results to show yet.')).toBeInTheDocument();
@@ -17,7 +19,9 @@ describe('CardList', () => {
           { id: '1', name: 'First', description: 'Desc A' },
           { id: '2', name: 'Second', description: 'Desc B' },
         ]}
-      />
+        selectedId={null}
+        onItemSelect={vi.fn()}
+      />,
     );
 
     const list = screen.getByRole('list');
@@ -25,11 +29,11 @@ describe('CardList', () => {
     expect(listItems).toHaveLength(2);
 
     expect(
-      within(listItems[0]).getByRole('heading', { level: 3, name: 'First' })
+      within(listItems[0]).getByRole('heading', { level: 3, name: 'First' }),
     ).toBeInTheDocument();
     expect(within(listItems[0]).getByText('Desc A')).toBeInTheDocument();
     expect(
-      within(listItems[1]).getByRole('heading', { level: 3, name: 'Second' })
+      within(listItems[1]).getByRole('heading', { level: 3, name: 'Second' }),
     ).toBeInTheDocument();
     expect(within(listItems[1]).getByText('Desc B')).toBeInTheDocument();
   });
@@ -41,7 +45,9 @@ describe('CardList', () => {
           { id: '1', name: 'Same', description: 'One' },
           { id: '2', name: 'Same', description: 'Two' },
         ]}
-      />
+        selectedId="2"
+        onItemSelect={vi.fn()}
+      />,
     );
 
     const list = screen.getByRole('list');

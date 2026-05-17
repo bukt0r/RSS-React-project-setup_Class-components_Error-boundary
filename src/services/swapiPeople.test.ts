@@ -1,6 +1,7 @@
 import {
   fetchFirstPagePeople,
   fetchPeoplePage,
+  fetchPersonById,
   SwapiHttpError,
 } from './swapiPeople';
 
@@ -94,6 +95,22 @@ describe('swapiPeople service', () => {
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network down'));
 
     await expect(fetchPeoplePage('Han', 1)).rejects.toThrow('Network down');
+  });
+
+  it('requests person details by id', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => lukePerson,
+    } as Response);
+
+    const result = await fetchPersonById('1');
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://swapi.py4e.com/api/people/1/',
+    );
+    expect(result.id).toBe('1');
+    expect(result.name).toBe('Luke Skywalker');
   });
 
   it('fetchFirstPagePeople returns items from the first page', async () => {

@@ -5,7 +5,7 @@ import {
   useState,
   type ChangeEvent,
 } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Outlet, useSearchParams } from 'react-router-dom';
 import CardList from '../components/CardList';
 import ErrorBanner from '../components/ErrorBanner';
 import ErrorSpike from '../components/ErrorSpike';
@@ -44,6 +44,33 @@ function HomePage() {
   const [simulateCrash, setSimulateCrash] = useState(false);
 
   const currentPage = parsePageParam(searchParams.get('page'));
+  const selectedDetailsId = searchParams.get('details');
+  const isDetailsOpen = selectedDetailsId !== null;
+
+  const closeDetails = useCallback((): void => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('details');
+        return next;
+      },
+      { replace: true },
+    );
+  }, [setSearchParams]);
+
+  const openDetails = useCallback(
+    (id: string): void => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.set('details', id);
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
 
   const updatePageInUrl = useCallback(
     (page: number) => {
@@ -51,6 +78,7 @@ function HomePage() {
         (prev) => {
           const next = new URLSearchParams(prev);
           next.set('page', String(page));
+          next.delete('details');
           return next;
         },
         { replace: true },
@@ -115,6 +143,10 @@ function HomePage() {
     const nextValue = event.target.value;
     setSearchInput(nextValue);
 
+    if (isDetailsOpen) {
+      closeDetails();
+    }
+
     if (currentPage !== 1) {
       updatePageInUrl(1);
     }
@@ -125,9 +157,11 @@ function HomePage() {
 
     if (currentPage !== 1) {
       updatePageInUrl(1);
+    } else if (isDetailsOpen) {
+      closeDetails();
     }
 
-    if (trimmed === committedSearch && currentPage === 1) {
+    if (trimmed === committedSearch && currentPage === 1 && !isDetailsOpen) {
       return;
     }
 
@@ -143,9 +177,22 @@ function HomePage() {
     setSimulateCrash(true);
   };
 
+  const handleResultsPanelClick = (): void => {
+    if (isDetailsOpen) {
+      closeDetails();
+    }
+  };
+
   return (
-    <main className="app-layout">
-      <section className="search-section" aria-label="Search section">
+    <main
+      className={`app-layout home-split ${isDetailsOpen ? 'home-split--open' : ''}`}
+    >
+      <div className="home-split__main">
+      <section
+        className="search-section"
+        aria-label="Search section"
+        onClick={(event) => event.stopPropagation()}
+      >
         <h1>Item Search</h1>
         <div className="search-controls">
           <input
@@ -165,7 +212,11 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="results-section" aria-label="Results section">
+      <section
+        className="results-section"
+        aria-label="Results section"
+        onClick={handleResultsPanelClick}
+      >
         <h2>Results</h2>
         <ErrorBanner message={fetchError} />
         <div className="results-section__panel">
@@ -179,25 +230,39 @@ function HomePage() {
             </div>
           ) : null}
           <div className="results-section__body">
-            <CardList items={results} />
+            <CardList
+              items={results}
+              selectedId={selectedDetailsId}
+              onItemSelect={openDetails}
+            />
           </div>
         </div>
         {hasLoadedOnce && !isLoading ? (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
+          <div onClick={(event) => event.stopPropagation()}>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
         ) : null}
       </section>
 
-      <div className="app-test-error">
+      <div
+        className="app-test-error"
+        onClick={(event) => event.stopPropagation()}
+      >
         <button type="button" onClick={handleTestErrorClick}>
           Test error
         </button>
       </div>
 
       {simulateCrash ? <ErrorSpike /> : null}
+      </div>
+
+      <aside className="home-split__details">
+        <Outlet />
+      </aside>
     </main>
   );
 }

@@ -2,11 +2,12 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App';
-import { fetchPeoplePage } from './services/swapiPeople';
+import { fetchPeoplePage, fetchPersonById } from './services/swapiPeople';
 import { readStoredSearchRaw } from './services/searchStorage';
 
 vi.mock('./services/swapiPeople', () => ({
   fetchPeoplePage: vi.fn(),
+  fetchPersonById: vi.fn(),
   SwapiHttpError: class SwapiHttpError extends Error {},
 }));
 
@@ -31,6 +32,11 @@ describe('App routing', () => {
       items: [],
       currentPage: 1,
       totalPages: 1,
+    });
+    vi.mocked(fetchPersonById).mockResolvedValue({
+      id: '1',
+      name: 'Luke Skywalker',
+      description: 'Jedi',
     });
   });
 
