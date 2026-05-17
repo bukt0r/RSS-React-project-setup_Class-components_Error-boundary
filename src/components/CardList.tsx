@@ -1,4 +1,3 @@
-import { Component } from 'react';
 import Card from './Card';
 import type { SearchResultItem } from '../types/item';
 
@@ -6,28 +5,24 @@ interface CardListProps {
   items: SearchResultItem[];
 }
 
-class CardList extends Component<CardListProps> {
-  render() {
-    const { items } = this.props;
-
-    if (items.length === 0) {
-      return (
-        <p className="results-empty" role="status">
-          No results to show yet.
-        </p>
-      );
-    }
-
+function CardList({ items }: CardListProps) {
+  if (items.length === 0) {
     return (
-      <ul className="result-list">
-        {items.map((item, index) => (
-          <li key={`${item.name}-${index}`} className="result-list__item">
-            <Card item={item} />
-          </li>
-        ))}
-      </ul>
+      <p className="results-empty" role="status">
+        No results to show yet.
+      </p>
     );
   }
+
+  return (
+    <ul className="result-list">
+      {items.map((item, index) => (
+        <li key={`${item.name}-${index}`} className="result-list__item">
+          <Card item={item} />
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 export default CardList;

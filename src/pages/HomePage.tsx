@@ -3,13 +3,14 @@ import CardList from '../components/CardList';
 import ErrorBanner from '../components/ErrorBanner';
 import ErrorSpike from '../components/ErrorSpike';
 import LoadingSpinner from '../components/LoadingSpinner';
-import {
-  readStoredSearchRaw,
-  writeStoredSearchTrimmed,
-} from '../services/searchStorage';
 import { fetchFirstPagePeople, SwapiHttpError } from '../services/swapiPeople';
 import type { SearchResultItem } from '../types/item';
 import '../App.css';
+
+interface HomePageProps {
+  readStoredSearch: () => string | null;
+  saveTrimmedSearch: (trimmed: string) => void;
+}
 
 interface HomePageState {
   searchInput: string;
@@ -19,7 +20,7 @@ interface HomePageState {
   simulateCrash: boolean;
 }
 
-class HomePage extends Component<Record<string, never>, HomePageState> {
+class HomePage extends Component<HomePageProps, HomePageState> {
   private isUnmounted = false;
 
   private lastFetchedTrimmedQuery: string | null = null;
@@ -33,7 +34,7 @@ class HomePage extends Component<Record<string, never>, HomePageState> {
   };
 
   componentDidMount(): void {
-    const savedQuery = readStoredSearchRaw();
+    const savedQuery = this.props.readStoredSearch();
     const searchInput = savedQuery ?? '';
 
     this.setState((prevState) => ({ ...prevState, searchInput }));
@@ -93,7 +94,7 @@ class HomePage extends Component<Record<string, never>, HomePageState> {
       const items = await fetchFirstPagePeople(trimmed);
       if (this.isUnmounted) return;
       this.lastFetchedTrimmedQuery = trimmed;
-      writeStoredSearchTrimmed(trimmed);
+      this.props.saveTrimmedSearch(trimmed);
       this.setState((prevState) => ({
         ...prevState,
         results: items,
