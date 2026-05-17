@@ -1,6 +1,7 @@
 import type { SearchResultItem } from '../types/item';
 
 const SWAPI_PEOPLE_URL = 'https://swapi.py4e.com/api/people/';
+const SWAPI_PAGE_SIZE = 10;
 
 export class SwapiHttpError extends Error {
   readonly status: number;
@@ -11,6 +12,12 @@ export class SwapiHttpError extends Error {
     this.status = status;
     Object.setPrototypeOf(this, new.target.prototype);
   }
+}
+
+export interface PeoplePageResult {
+  items: SearchResultItem[];
+  currentPage: number;
+  totalPages: number;
 }
 
 function messageForHttpStatus(status: number): string {
@@ -30,6 +37,7 @@ function messageForHttpStatus(status: number): string {
 }
 
 interface SwapiPerson {
+  url: string;
   name: string;
   height: string;
   mass: string;
@@ -39,7 +47,13 @@ interface SwapiPerson {
 }
 
 interface SwapiPeopleListResponse {
+  count?: number;
   results?: SwapiPerson[];
+}
+
+function extractPersonId(url: string): string {
+  const segments = url.replace(/\/$/, '').split('/');
+  return segments.at(-1) ?? '';
 }
 
 function personToItem(person: SwapiPerson): SearchResultItem {
@@ -51,18 +65,35 @@ function personToItem(person: SwapiPerson): SearchResultItem {
     `Hair: ${person.hair_color}`,
   ].join(' · ');
 
-  return { name: person.name, description };
+  return {
+    id: extractPersonId(person.url),
+    name: person.name,
+    description,
+  };
 }
 
-export async function fetchFirstPagePeople(
-  searchFromInput: string,
-): Promise<SearchResultItem[]> {
+function buildPeopleUrl(searchFromInput: string, page: number): string {
   const trimmed = searchFromInput.trim();
-  const url =
-    trimmed.length > 0
-      ? `${SWAPI_PEOPLE_URL}?search=${encodeURIComponent(trimmed)}`
-      : SWAPI_PEOPLE_URL;
+  const params = new URLSearchParams();
 
+  if (trimmed.length > 0) {
+    params.set('search', trimmed);
+  }
+
+  if (page > 1) {
+    params.set('page', String(page));
+  }
+
+  const query = params.toString();
+  return query.length > 0 ? `${SWAPI_PEOPLE_URL}?${query}` : SWAPI_PEOPLE_URL;
+}
+
+export async function fetchPeoplePage(
+  searchFromInput: string,
+  page: number,
+): Promise<PeoplePageResult> {
+  const safePage = Math.max(1, Math.floor(page));
+  const url = buildPeopleUrl(searchFromInput, safePage);
   const response = await fetch(url);
 
   if (!response.ok) {
@@ -74,6 +105,19 @@ export async function fetchFirstPagePeople(
 
   const data = (await response.json()) as SwapiPeopleListResponse;
   const people = data.results ?? [];
+  const count = data.count ?? people.length;
+  const totalPages = Math.max(1, Math.ceil(count / SWAPI_PAGE_SIZE));
 
-  return people.map(personToItem);
+  return {
+    items: people.map(personToItem),
+    currentPage: safePage,
+    totalPages,
+  };
+}
+
+export async function fetchFirstPagePeople(
+  searchFromInput: string,
+): Promise<SearchResultItem[]> {
+  const page = await fetchPeoplePage(searchFromInput, 1);
+  return page.items;
 }

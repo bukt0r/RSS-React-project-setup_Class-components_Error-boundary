@@ -1,61 +1,76 @@
-import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+} from 'react';
+import { useSearchParams } from 'react-router-dom';
 import CardList from '../components/CardList';
 import ErrorBanner from '../components/ErrorBanner';
 import ErrorSpike from '../components/ErrorSpike';
 import LoadingSpinner from '../components/LoadingSpinner';
+import Pagination from '../components/Pagination';
 import { useSearchStorage } from '../hooks/useSearchStorage';
-import { fetchFirstPagePeople, SwapiHttpError } from '../services/swapiPeople';
+import { fetchPeoplePage, SwapiHttpError } from '../services/swapiPeople';
 import type { SearchResultItem } from '../types/item';
 import '../App.css';
 
+function parsePageParam(value: string | null): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return 1;
+  }
+
+  return Math.floor(parsed);
+}
+
 function HomePage() {
   const { readStoredSearch, saveTrimmedSearch } = useSearchStorage();
+  const [searchParams, setSearchParams] = useSearchParams();
   const isMountedRef = useRef(true);
-  const lastFetchedTrimmedQueryRef = useRef<string | null>(null);
 
   const [searchInput, setSearchInput] = useState(
     () => readStoredSearch() ?? '',
   );
-  const initialSearchInputRef = useRef(searchInput);
+  const [committedSearch, setCommittedSearch] = useState(
+    () => readStoredSearch() ?? '',
+  );
   const [results, setResults] = useState<SearchResultItem[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [simulateCrash, setSimulateCrash] = useState(false);
 
-  const loadInitialPage = useCallback(async (searchInputForRequest: string) => {
-    const trimmed = searchInputForRequest.trim();
+  const currentPage = parsePageParam(searchParams.get('page'));
 
-    try {
-      const items = await fetchFirstPagePeople(searchInputForRequest);
-      if (!isMountedRef.current) return;
-      lastFetchedTrimmedQueryRef.current = trimmed;
-      setResults(items);
+  const updatePageInUrl = useCallback(
+    (page: number) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.set('page', String(page));
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
+  const fetchResults = useCallback(
+    async (query: string, page: number) => {
+      setIsLoading(true);
       setFetchError(null);
-    } catch (error: unknown) {
-      if (!isMountedRef.current) return;
-      const message =
-        error instanceof SwapiHttpError
-          ? error.message
-          : 'Unable to load data. Please try again.';
-      setResults([]);
-      setFetchError(message);
-    } finally {
-      if (isMountedRef.current) {
-        setIsLoading(false);
-      }
-    }
-  }, []);
 
-  const submitSearch = useCallback(
-    async (trimmed: string) => {
       try {
-        const items = await fetchFirstPagePeople(trimmed);
+        const data = await fetchPeoplePage(query, page);
         if (!isMountedRef.current) return;
-        lastFetchedTrimmedQueryRef.current = trimmed;
-        saveTrimmedSearch(trimmed);
-        setResults(items);
-        setSearchInput(trimmed);
+        setResults(data.items);
+        setTotalPages(data.totalPages);
         setFetchError(null);
+        setHasLoadedOnce(true);
       } catch (error: unknown) {
         if (!isMountedRef.current) return;
         const message =
@@ -64,36 +79,64 @@ function HomePage() {
             : 'Unable to load data. Please try again.';
         setResults([]);
         setFetchError(message);
+        setHasLoadedOnce(true);
       } finally {
         if (isMountedRef.current) {
           setIsLoading(false);
         }
       }
     },
-    [saveTrimmedSearch],
+    [],
   );
 
   useEffect(() => {
     isMountedRef.current = true;
-    void loadInitialPage(initialSearchInputRef.current);
-
     return () => {
       isMountedRef.current = false;
     };
-  }, [loadInitialPage]);
+  }, []);
+
+  useEffect(() => {
+    if (!searchParams.get('page')) {
+      updatePageInUrl(1);
+    }
+  }, [searchParams, updatePageInUrl]);
+
+  useEffect(() => {
+    if (!searchParams.get('page')) {
+      return;
+    }
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch when URL page or query changes
+    void fetchResults(committedSearch, currentPage);
+  }, [committedSearch, currentPage, fetchResults, searchParams]);
 
   const handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    setSearchInput(event.target.value);
+    const nextValue = event.target.value;
+    setSearchInput(nextValue);
+
+    if (currentPage !== 1) {
+      updatePageInUrl(1);
+    }
   };
 
   const handleSearchClick = (): void => {
     const trimmed = searchInput.trim();
 
-    if (trimmed === lastFetchedTrimmedQueryRef.current) {
+    if (currentPage !== 1) {
+      updatePageInUrl(1);
+    }
+
+    if (trimmed === committedSearch && currentPage === 1) {
       return;
     }
 
-    void submitSearch(trimmed);
+    setCommittedSearch(trimmed);
+    saveTrimmedSearch(trimmed);
+  };
+
+  const handlePageChange = (page: number): void => {
+    updatePageInUrl(page);
   };
 
   const handleTestErrorClick = (): void => {
@@ -139,6 +182,13 @@ function HomePage() {
             <CardList items={results} />
           </div>
         </div>
+        {hasLoadedOnce && !isLoading ? (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        ) : null}
       </section>
 
       <div className="app-test-error">

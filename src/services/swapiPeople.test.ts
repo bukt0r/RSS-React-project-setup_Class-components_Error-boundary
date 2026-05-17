@@ -1,4 +1,18 @@
-import { fetchFirstPagePeople, SwapiHttpError } from './swapiPeople';
+import {
+  fetchFirstPagePeople,
+  fetchPeoplePage,
+  SwapiHttpError,
+} from './swapiPeople';
+
+const lukePerson = {
+  url: 'https://swapi.py4e.com/api/people/1/',
+  name: 'Luke Skywalker',
+  gender: 'male',
+  birth_year: '19BBY',
+  height: '172',
+  mass: '77',
+  hair_color: 'blond',
+};
 
 describe('swapiPeople service', () => {
   afterEach(() => {
@@ -9,10 +23,10 @@ describe('swapiPeople service', () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({ results: [] }),
+      json: async () => ({ count: 0, results: [] }),
     } as Response);
 
-    await fetchFirstPagePeople('   ');
+    await fetchPeoplePage('   ', 1);
 
     expect(fetchMock).toHaveBeenCalledWith('https://swapi.py4e.com/api/people/');
   });
@@ -22,31 +36,42 @@ describe('swapiPeople service', () => {
       ok: true,
       status: 200,
       json: async () => ({
-        results: [
-          {
-            name: 'Luke Skywalker',
-            gender: 'male',
-            birth_year: '19BBY',
-            height: '172',
-            mass: '77',
-            hair_color: 'blond',
-          },
-        ],
+        count: 1,
+        results: [lukePerson],
       }),
     } as Response);
 
-    const result = await fetchFirstPagePeople(' Luke ');
+    const result = await fetchPeoplePage(' Luke ', 1);
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
       'https://swapi.py4e.com/api/people/?search=Luke',
     );
-    expect(result).toEqual([
-      {
-        name: 'Luke Skywalker',
-        description:
-          'Gender: male · Birth year: 19BBY · Height: 172 cm · Mass: 77 kg · Hair: blond',
-      },
-    ]);
+    expect(result).toEqual({
+      items: [
+        {
+          id: '1',
+          name: 'Luke Skywalker',
+          description:
+            'Gender: male · Birth year: 19BBY · Height: 172 cm · Mass: 77 kg · Hair: blond',
+        },
+      ],
+      currentPage: 1,
+      totalPages: 1,
+    });
+  });
+
+  it('requests a specific page number in the query string', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ count: 20, results: [lukePerson] }),
+    } as Response);
+
+    await fetchPeoplePage('', 2);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://swapi.py4e.com/api/people/?page=2',
+    );
   });
 
   it('throws SwapiHttpError with mapped message for 404', async () => {
@@ -56,7 +81,7 @@ describe('swapiPeople service', () => {
       json: async () => ({}),
     } as Response);
 
-    await expect(fetchFirstPagePeople('Leia')).rejects.toEqual(
+    await expect(fetchPeoplePage('Leia', 1)).rejects.toEqual(
       expect.objectContaining<Partial<SwapiHttpError>>({
         name: 'SwapiHttpError',
         status: 404,
@@ -68,6 +93,28 @@ describe('swapiPeople service', () => {
   it('propagates network failures from fetch', async () => {
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network down'));
 
-    await expect(fetchFirstPagePeople('Han')).rejects.toThrow('Network down');
+    await expect(fetchPeoplePage('Han', 1)).rejects.toThrow('Network down');
+  });
+
+  it('fetchFirstPagePeople returns items from the first page', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        count: 1,
+        results: [lukePerson],
+      }),
+    } as Response);
+
+    const result = await fetchFirstPagePeople('Luke');
+
+    expect(result).toEqual([
+      {
+        id: '1',
+        name: 'Luke Skywalker',
+        description:
+          'Gender: male · Birth year: 19BBY · Height: 172 cm · Mass: 77 kg · Hair: blond',
+      },
+    ]);
   });
 });

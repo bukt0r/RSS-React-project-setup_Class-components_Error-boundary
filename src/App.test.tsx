@@ -1,17 +1,26 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import { useSearchStorage } from './hooks/useSearchStorage';
-import { fetchFirstPagePeople } from './services/swapiPeople';
+import { fetchPeoplePage } from './services/swapiPeople';
 
 vi.mock('./services/swapiPeople', () => ({
-  fetchFirstPagePeople: vi.fn(),
+  fetchPeoplePage: vi.fn(),
   SwapiHttpError: class SwapiHttpError extends Error {},
 }));
 
 vi.mock('./hooks/useSearchStorage', () => ({
   useSearchStorage: vi.fn(),
 }));
+
+function renderHomePage(initialPath = '/?page=1') {
+  return render(
+    <MemoryRouter initialEntries={[initialPath]}>
+      <HomePage />
+    </MemoryRouter>,
+  );
+}
 
 describe('HomePage', () => {
   beforeEach(() => {
@@ -23,14 +32,16 @@ describe('HomePage', () => {
       readStoredSearch: () => 'Luke',
       saveTrimmedSearch: vi.fn(),
     });
-    vi.mocked(fetchFirstPagePeople).mockResolvedValue([
-      { name: 'Luke Skywalker', description: 'Jedi' },
-    ]);
+    vi.mocked(fetchPeoplePage).mockResolvedValue({
+      items: [{ id: '1', name: 'Luke Skywalker', description: 'Jedi' }],
+      currentPage: 1,
+      totalPages: 1,
+    });
 
-    render(<HomePage />);
+    renderHomePage();
 
     await waitFor(() => {
-      expect(fetchFirstPagePeople).toHaveBeenCalledWith('Luke');
+      expect(fetchPeoplePage).toHaveBeenCalledWith('Luke', 1);
     });
     expect(screen.getByDisplayValue('Luke')).toBeInTheDocument();
     expect(
@@ -45,11 +56,17 @@ describe('HomePage', () => {
       readStoredSearch: () => null,
       saveTrimmedSearch,
     });
-    vi.mocked(fetchFirstPagePeople)
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ name: 'Leia Organa', description: 'Leader' }]);
+    vi.mocked(fetchPeoplePage).mockResolvedValue({
+      items: [{ id: '2', name: 'Leia Organa', description: 'Leader' }],
+      currentPage: 1,
+      totalPages: 1,
+    });
 
-    render(<HomePage />);
+    renderHomePage();
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Search' })).not.toBeDisabled();
+    });
 
     const input = screen.getByPlaceholderText('Enter item name');
     await user.clear(input);
@@ -57,7 +74,7 @@ describe('HomePage', () => {
     await user.click(screen.getByRole('button', { name: 'Search' }));
 
     await waitFor(() => {
-      expect(fetchFirstPagePeople).toHaveBeenLastCalledWith('Leia');
+      expect(fetchPeoplePage).toHaveBeenLastCalledWith('Leia', 1);
     });
     expect(saveTrimmedSearch).toHaveBeenCalledWith('Leia');
     expect(screen.getByDisplayValue('Leia')).toBeInTheDocument();

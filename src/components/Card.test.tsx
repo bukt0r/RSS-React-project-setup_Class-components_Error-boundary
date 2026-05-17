@@ -6,6 +6,7 @@ describe('Card', () => {
     render(
       <Card
         item={{
+          id: '1',
           name: 'Luke Skywalker',
           description: 'Human from Tatooine',
         }}
@@ -23,6 +24,7 @@ describe('Card', () => {
     render(
       <Card
         item={{
+          id: '2',
           name: '',
           description: '',
         }}

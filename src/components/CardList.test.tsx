@@ -14,8 +14,8 @@ describe('CardList', () => {
     render(
       <CardList
         items={[
-          { name: 'First', description: 'Desc A' },
-          { name: 'Second', description: 'Desc B' },
+          { id: '1', name: 'First', description: 'Desc A' },
+          { id: '2', name: 'Second', description: 'Desc B' },
         ]}
       />
     );
@@ -38,8 +38,8 @@ describe('CardList', () => {
     render(
       <CardList
         items={[
-          { name: 'Same', description: 'One' },
-          { name: 'Same', description: 'Two' },
+          { id: '1', name: 'Same', description: 'One' },
+          { id: '2', name: 'Same', description: 'Two' },
         ]}
       />
     );

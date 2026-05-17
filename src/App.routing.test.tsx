@@ -2,11 +2,11 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App';
-import { fetchFirstPagePeople } from './services/swapiPeople';
+import { fetchPeoplePage } from './services/swapiPeople';
 import { readStoredSearchRaw } from './services/searchStorage';
 
 vi.mock('./services/swapiPeople', () => ({
-  fetchFirstPagePeople: vi.fn(),
+  fetchPeoplePage: vi.fn(),
   SwapiHttpError: class SwapiHttpError extends Error {},
 }));
 
@@ -27,7 +27,11 @@ describe('App routing', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(readStoredSearchRaw).mockReturnValue(null);
-    vi.mocked(fetchFirstPagePeople).mockResolvedValue([]);
+    vi.mocked(fetchPeoplePage).mockResolvedValue({
+      items: [],
+      currentPage: 1,
+      totalPages: 1,
+    });
   });
 
   it('renders About page with author and course link', () => {
@@ -62,7 +66,7 @@ describe('App routing', () => {
 
   it('navigates between Search and About via header links', async () => {
     const user = userEvent.setup();
-    renderApp('/');
+    renderApp('/?page=1');
 
     expect(
       screen.getByRole('heading', { level: 1, name: 'Item Search' }),
