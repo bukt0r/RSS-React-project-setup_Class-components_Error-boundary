@@ -1,12 +1,14 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import HomePage from './pages/HomePage';
+import PersonDetailsPanel from './pages/PersonDetailsPanel';
 import { useSearchStorage } from './hooks/useSearchStorage';
-import { fetchPeoplePage } from './services/swapiPeople';
+import { fetchPeoplePage, fetchPersonById } from './services/swapiPeople';
 
 vi.mock('./services/swapiPeople', () => ({
   fetchPeoplePage: vi.fn(),
+  fetchPersonById: vi.fn(),
   SwapiHttpError: class SwapiHttpError extends Error {},
 }));
 
@@ -17,7 +19,11 @@ vi.mock('./hooks/useSearchStorage', () => ({
 function renderHomePage(initialPath = '/?page=1') {
   return render(
     <MemoryRouter initialEntries={[initialPath]}>
-      <HomePage />
+      <Routes>
+        <Route path="/" element={<HomePage />}>
+          <Route index element={<PersonDetailsPanel />} />
+        </Route>
+      </Routes>
     </MemoryRouter>,
   );
 }
@@ -25,6 +31,10 @@ function renderHomePage(initialPath = '/?page=1') {
 describe('HomePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(useSearchStorage).mockReturnValue({
+      readStoredSearch: () => null,
+      saveTrimmedSearch: vi.fn(),
+    });
   });
 
   it('loads initial data using query restored from storage', async () => {
@@ -81,5 +91,60 @@ describe('HomePage', () => {
     expect(
       screen.getByRole('heading', { level: 3, name: 'Leia Organa' }),
     ).toBeInTheDocument();
+  });
+
+  it('updates page query param when pagination next is clicked', async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetchPeoplePage)
+      .mockResolvedValueOnce({
+        items: [{ id: '1', name: 'Person One', description: 'First page' }],
+        currentPage: 1,
+        totalPages: 2,
+      })
+      .mockResolvedValueOnce({
+        items: [{ id: '2', name: 'Person Two', description: 'Second page' }],
+        currentPage: 2,
+        totalPages: 2,
+      });
+
+    renderHomePage();
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Next' })).toBeEnabled();
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+
+    await waitFor(() => {
+      expect(fetchPeoplePage).toHaveBeenLastCalledWith('', 2);
+    });
+    expect(screen.getByText('Page 2 of 2')).toBeInTheDocument();
+  });
+
+  it('sets details query param when a result card is selected', async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetchPeoplePage).mockResolvedValue({
+      items: [{ id: '10', name: 'Han Solo', description: 'Smuggler' }],
+      currentPage: 1,
+      totalPages: 1,
+    });
+    vi.mocked(fetchPersonById).mockResolvedValue({
+      id: '10',
+      name: 'Han Solo',
+      description: 'Smuggler details',
+    });
+
+    renderHomePage();
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Han Solo/i })).toBeEnabled();
+    });
+
+    await user.click(screen.getByRole('button', { name: /Han Solo/i }));
+
+    await waitFor(() => {
+      expect(fetchPersonById).toHaveBeenCalledWith('10');
+    });
+    expect(screen.getByText('Smuggler details')).toBeInTheDocument();
   });
 });

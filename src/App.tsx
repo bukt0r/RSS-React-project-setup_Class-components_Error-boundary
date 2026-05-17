@@ -21,7 +21,7 @@ function App() {
 
       <Routes>
         <Route path="/" element={<HomePage />}>
-          <Route element={<PersonDetailsPanel />} />
+          <Route index element={<PersonDetailsPanel />} />
         </Route>
         <Route path="/about" element={<AboutPage />} />
         <Route path="*" element={<NotFoundPage />} />
