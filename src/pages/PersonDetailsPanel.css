@@ -1,0 +1,61 @@
+.person-details {
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 280px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--social-bg);
+  text-align: left;
+}
+
+.person-details__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.person-details__title {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--text-h);
+}
+
+.person-details__close {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  font: inherit;
+  cursor: pointer;
+}
+
+.person-details__close:hover {
+  border-color: var(--accent-border);
+}
+
+.person-details__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+}
+
+.person-details__content {
+  margin: 0;
+}
+
+.person-details__name {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+  color: var(--text-h);
+}
+
+.person-details__description {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--text);
+}
