@@ -16,14 +16,10 @@
   line-height: 1.5;
 }
 
-.about-page__author-name {
-  color: var(--text-h);
-}
-
-.about-page__course-link {
+.about-page__link {
   color: var(--accent);
 }
 
-.about-page__course-link:hover {
+.about-page__link:hover {
   text-decoration: underline;
 }

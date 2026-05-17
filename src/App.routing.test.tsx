@@ -47,14 +47,16 @@ describe('App routing', () => {
       screen.getByRole('heading', { level: 1, name: 'About' }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Author:/)).toBeInTheDocument();
-    expect(screen.getByText('vufimcev')).toBeInTheDocument();
+
+    const authorLink = screen.getByRole('link', { name: 'vufimcev' });
+    expect(authorLink).toHaveAttribute('href', 'https://github.com/bukt0r');
 
     const courseLink = screen.getByRole('link', {
       name: 'RS School React course',
     });
     expect(courseLink).toHaveAttribute(
       'href',
-      'https://rs.school/courses/react/en',
+      'https://rs.school/courses/reactjs',
     );
   });
 

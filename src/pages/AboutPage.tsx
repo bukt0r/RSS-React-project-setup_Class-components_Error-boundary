@@ -1,6 +1,7 @@
 import './AboutPage.css';
 
-const RS_REACT_COURSE_URL = 'https://rs.school/courses/react/en';
+const AUTHOR_GITHUB_URL = 'https://github.com/bukt0r';
+const RS_REACT_COURSE_URL = 'https://rs.school/courses/reactjs';
 
 function AboutPage() {
   return (
@@ -11,11 +12,19 @@ function AboutPage() {
         course.
       </p>
       <p className="about-page__author">
-        Author: <span className="about-page__author-name">vufimcev</span>
+        Author:{' '}
+        <a
+          className="about-page__link"
+          href={AUTHOR_GITHUB_URL}
+          target="_blank"
+          rel="noreferrer"
+        >
+          vufimcev
+        </a>
       </p>
       <p>
         <a
-          className="about-page__course-link"
+          className="about-page__link"
           href={RS_REACT_COURSE_URL}
           target="_blank"
           rel="noreferrer"
