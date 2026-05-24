@@ -232,8 +232,10 @@ function HomePage() {
           <div className="results-section__body">
             <CardList
               items={results}
-              selectedId={selectedDetailsId}
-              onItemSelect={openDetails}
+              detailsId={selectedDetailsId}
+              onOpenDetails={openDetails}
+              isItemChecked={() => false}
+              onToggleItemCheck={() => {}}
             />
           </div>
         </div>

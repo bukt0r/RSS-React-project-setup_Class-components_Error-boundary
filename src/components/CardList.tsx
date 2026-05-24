@@ -3,11 +3,19 @@ import type { SearchResultItem } from '../types/item';
 
 interface CardListProps {
   items: SearchResultItem[];
-  selectedId: string | null;
-  onItemSelect: (id: string) => void;
+  detailsId: string | null;
+  onOpenDetails: (id: string) => void;
+  isItemChecked: (id: string) => boolean;
+  onToggleItemCheck: (item: SearchResultItem) => void;
 }
 
-function CardList({ items, selectedId, onItemSelect }: CardListProps) {
+function CardList({
+  items,
+  detailsId,
+  onOpenDetails,
+  isItemChecked,
+  onToggleItemCheck,
+}: CardListProps) {
   if (items.length === 0) {
     return (
       <p className="results-empty" role="status">
@@ -22,8 +30,10 @@ function CardList({ items, selectedId, onItemSelect }: CardListProps) {
         <li key={`${item.name}-${index}`} className="result-list__item">
           <Card
             item={item}
-            isSelected={selectedId === item.id}
-            onSelect={onItemSelect}
+            isChecked={isItemChecked(item.id)}
+            isDetailsActive={detailsId === item.id}
+            onToggleCheck={onToggleItemCheck}
+            onOpenDetails={onOpenDetails}
           />
         </li>
       ))}

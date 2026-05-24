@@ -1,11 +1,16 @@
 import { render, screen, within } from '@testing-library/react';
 import CardList from './CardList';
 
+const defaultHandlers = {
+  detailsId: null,
+  onOpenDetails: vi.fn(),
+  isItemChecked: () => false,
+  onToggleItemCheck: vi.fn(),
+};
+
 describe('CardList', () => {
   it('shows empty state when items array is empty', () => {
-    render(
-      <CardList items={[]} selectedId={null} onItemSelect={vi.fn()} />,
-    );
+    render(<CardList items={[]} {...defaultHandlers} />);
 
     expect(screen.getByRole('status')).toBeInTheDocument();
     expect(screen.getByText('No results to show yet.')).toBeInTheDocument();
@@ -19,8 +24,7 @@ describe('CardList', () => {
           { id: '1', name: 'First', description: 'Desc A' },
           { id: '2', name: 'Second', description: 'Desc B' },
         ]}
-        selectedId={null}
-        onItemSelect={vi.fn()}
+        {...defaultHandlers}
       />,
     );
 
@@ -38,15 +42,15 @@ describe('CardList', () => {
     expect(within(listItems[1]).getByText('Desc B')).toBeInTheDocument();
   });
 
-  it('renders two distinct rows when two items share the same name', () => {
+  it('marks details-active card when detailsId matches', () => {
     render(
       <CardList
         items={[
           { id: '1', name: 'Same', description: 'One' },
           { id: '2', name: 'Same', description: 'Two' },
         ]}
-        selectedId="2"
-        onItemSelect={vi.fn()}
+        {...defaultHandlers}
+        detailsId="2"
       />,
     );
 
@@ -54,5 +58,9 @@ describe('CardList', () => {
     expect(within(list).getAllByRole('listitem')).toHaveLength(2);
     expect(within(list).getByText('One')).toBeInTheDocument();
     expect(within(list).getByText('Two')).toBeInTheDocument();
+
+    const articles = within(list).getAllByRole('article');
+    expect(articles[0]).not.toHaveClass('result-card--details-active');
+    expect(articles[1]).toHaveClass('result-card--details-active');
   });
 });
