@@ -1,11 +1,25 @@
+import { useCallback } from 'react';
 import { NavLink, Route, Routes } from 'react-router-dom';
+import SelectionFlyout from './components/SelectionFlyout';
 import AboutPage from './pages/AboutPage';
 import HomePage from './pages/HomePage';
 import PersonDetailsPanel from './pages/PersonDetailsPanel';
 import NotFoundPage from './pages/NotFoundPage';
+import { useAppDispatch, useAppSelector } from './store/hooks';
+import { selectSelectedItemsCount } from './store/selectedItemsSelectors';
+import { clearSelectedItems } from './store/selectedItemsSlice';
 import './App.css';
 
 function App() {
+  const dispatch = useAppDispatch();
+  const selectedCount = useAppSelector(selectSelectedItemsCount);
+
+  const handleUnselectAll = useCallback((): void => {
+    dispatch(clearSelectedItems());
+  }, [dispatch]);
+
+  const handleDownload = useCallback((): void => {}, []);
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -26,6 +40,12 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+
+      <SelectionFlyout
+        selectedCount={selectedCount}
+        onUnselectAll={handleUnselectAll}
+        onDownload={handleDownload}
+      />
     </div>
   );
 }

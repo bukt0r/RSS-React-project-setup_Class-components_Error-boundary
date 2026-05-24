@@ -1,10 +1,16 @@
 .app-shell {
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   max-width: 1126px;
   margin: 0 auto;
   min-height: 100svh;
   padding: 24px;
   border-inline: 1px solid var(--border);
+}
+
+.app-shell > :not(.selection-flyout) {
+  flex-shrink: 0;
 }
 
 .app-header {
