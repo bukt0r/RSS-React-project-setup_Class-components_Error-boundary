@@ -42,6 +42,18 @@ describe('CardList', () => {
     expect(within(listItems[1]).getByText('Desc B')).toBeInTheDocument();
   });
 
+  it('reflects checked state from isItemChecked', () => {
+    render(
+      <CardList
+        items={[{ id: '1', name: 'First', description: 'Desc A' }]}
+        {...defaultHandlers}
+        isItemChecked={(id) => id === '1'}
+      />,
+    );
+
+    expect(screen.getByRole('checkbox', { name: 'Select First' })).toBeChecked();
+  });
+
   it('marks details-active card when detailsId matches', () => {
     render(
       <CardList
