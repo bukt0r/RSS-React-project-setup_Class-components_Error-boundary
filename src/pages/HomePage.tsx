@@ -13,6 +13,9 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
 import { useSearchStorage } from '../hooks/useSearchStorage';
 import { fetchPeoplePage, SwapiHttpError } from '../services/swapiPeople';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { selectSelectedItemsById } from '../store/selectedItemsSelectors';
+import { toggleSelectedItem } from '../store/selectedItemsSlice';
 import type { SearchResultItem } from '../types/item';
 import '../App.css';
 
@@ -26,6 +29,8 @@ function parsePageParam(value: string | null): number {
 }
 
 function HomePage() {
+  const dispatch = useAppDispatch();
+  const selectedItemsById = useAppSelector(selectSelectedItemsById);
   const { readStoredSearch, saveTrimmedSearch } = useSearchStorage();
   const [searchParams, setSearchParams] = useSearchParams();
   const isMountedRef = useRef(true);
@@ -183,6 +188,18 @@ function HomePage() {
     }
   };
 
+  const isItemChecked = useCallback(
+    (id: string): boolean => Boolean(selectedItemsById[id]),
+    [selectedItemsById],
+  );
+
+  const handleToggleItemCheck = useCallback(
+    (item: SearchResultItem): void => {
+      dispatch(toggleSelectedItem(item));
+    },
+    [dispatch],
+  );
+
   return (
     <main
       className={`app-layout home-split ${isDetailsOpen ? 'home-split--open' : ''}`}
@@ -234,8 +251,8 @@ function HomePage() {
               items={results}
               detailsId={selectedDetailsId}
               onOpenDetails={openDetails}
-              isItemChecked={() => false}
-              onToggleItemCheck={() => {}}
+              isItemChecked={isItemChecked}
+              onToggleItemCheck={handleToggleItemCheck}
             />
           </div>
         </div>
