@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App';
+import { renderWithProviders } from './test-utils/renderWithProviders';
 import { fetchPeoplePage, fetchPersonById } from './services/swapiPeople';
 import { readStoredSearchRaw } from './services/searchStorage';
 
@@ -17,7 +18,7 @@ vi.mock('./services/searchStorage', () => ({
 }));
 
 function renderApp(initialPath = '/') {
-  return render(
+  return renderWithProviders(
     <MemoryRouter initialEntries={[initialPath]}>
       <App />
     </MemoryRouter>,

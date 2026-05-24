@@ -1,7 +1,8 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import HomePage from './pages/HomePage';
+import { renderWithProviders } from './test-utils/renderWithProviders';
 import PersonDetailsPanel from './pages/PersonDetailsPanel';
 import { useSearchStorage } from './hooks/useSearchStorage';
 import { fetchPeoplePage, fetchPersonById } from './services/swapiPeople';
@@ -17,7 +18,7 @@ vi.mock('./hooks/useSearchStorage', () => ({
 }));
 
 function renderHomePage(initialPath = '/?page=1') {
-  return render(
+  return renderWithProviders(
     <MemoryRouter initialEntries={[initialPath]}>
       <Routes>
         <Route path="/" element={<HomePage />}>
