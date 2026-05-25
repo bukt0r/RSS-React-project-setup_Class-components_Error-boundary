@@ -1,0 +1,10 @@
+.error-banner {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent-bg) 80%, var(--bg));
+  color: var(--text-h);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
