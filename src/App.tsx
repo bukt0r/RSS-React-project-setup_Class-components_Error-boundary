@@ -6,19 +6,26 @@ import HomePage from './pages/HomePage';
 import PersonDetailsPanel from './pages/PersonDetailsPanel';
 import NotFoundPage from './pages/NotFoundPage';
 import { useAppDispatch, useAppSelector } from './store/hooks';
-import { selectSelectedItemsCount } from './store/selectedItemsSelectors';
+import { downloadSelectedItemsCsv } from './services/selectedItemsCsv';
+import {
+  selectSelectedItems,
+  selectSelectedItemsCount,
+} from './store/selectedItemsSelectors';
 import { clearSelectedItems } from './store/selectedItemsSlice';
 import './App.css';
 
 function App() {
   const dispatch = useAppDispatch();
   const selectedCount = useAppSelector(selectSelectedItemsCount);
+  const selectedItems = useAppSelector(selectSelectedItems);
 
   const handleUnselectAll = useCallback((): void => {
     dispatch(clearSelectedItems());
   }, [dispatch]);
 
-  const handleDownload = useCallback((): void => {}, []);
+  const handleDownload = useCallback((): void => {
+    downloadSelectedItemsCsv(selectedItems);
+  }, [selectedItems]);
 
   return (
     <div className="app-shell">
