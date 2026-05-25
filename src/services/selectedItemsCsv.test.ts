@@ -1,6 +1,7 @@
 import {
   buildAppDetailsUrl,
   buildSelectedItemsCsvContent,
+  downloadSelectedItemsCsv,
   escapeCsvField,
   getSelectedItemsCsvFilename,
 } from './selectedItemsCsv';
@@ -41,5 +42,52 @@ describe('selectedItemsCsv', () => {
   it('builds filename from selected count', () => {
     expect(getSelectedItemsCsvFilename(15)).toBe('15_items.csv');
     expect(getSelectedItemsCsvFilename(1)).toBe('1_items.csv');
+  });
+
+  it('does nothing when items list is empty', () => {
+    const createObjectUrl = vi.fn();
+    vi.stubGlobal('URL', {
+      ...URL,
+      createObjectURL: createObjectUrl,
+      revokeObjectURL: vi.fn(),
+    });
+
+    downloadSelectedItemsCsv([], 'https://example.com');
+
+    expect(createObjectUrl).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
+  it('downloads csv using Blob and temporary anchor link', () => {
+    const click = vi.fn();
+    const downloadLink = {
+      href: '',
+      download: '',
+      click,
+    } as unknown as HTMLAnchorElement;
+
+    const createElement = vi
+      .spyOn(document, 'createElement')
+      .mockReturnValue(downloadLink);
+    const createObjectUrl = vi.fn().mockReturnValue('blob:mock-url');
+    const revokeObjectUrl = vi.fn();
+    vi.stubGlobal('URL', {
+      ...URL,
+      createObjectURL: createObjectUrl,
+      revokeObjectURL: revokeObjectUrl,
+    });
+
+    downloadSelectedItemsCsv([sampleItem], 'https://example.com');
+
+    expect(createObjectUrl).toHaveBeenCalledTimes(1);
+    const blob = createObjectUrl.mock.calls[0][0] as Blob;
+    expect(blob.type).toBe('text/csv;charset=utf-8');
+    expect(downloadLink.href).toBe('blob:mock-url');
+    expect(downloadLink.download).toBe('1_items.csv');
+    expect(click).toHaveBeenCalledTimes(1);
+    expect(revokeObjectUrl).toHaveBeenCalledWith('blob:mock-url');
+
+    createElement.mockRestore();
+    vi.unstubAllGlobals();
   });
 });

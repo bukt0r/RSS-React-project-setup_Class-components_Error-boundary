@@ -39,3 +39,22 @@ export function buildSelectedItemsCsvContent(
 export function getSelectedItemsCsvFilename(selectedCount: number): string {
   return `${selectedCount}_items.csv`;
 }
+
+export function downloadSelectedItemsCsv(
+  items: SearchResultItem[],
+  appOrigin: string = window.location.origin,
+): void {
+  if (items.length === 0) {
+    return;
+  }
+
+  const csvContent = buildSelectedItemsCsvContent(items, appOrigin);
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+  const objectUrl = URL.createObjectURL(blob);
+  const downloadLink = document.createElement('a');
+
+  downloadLink.href = objectUrl;
+  downloadLink.download = getSelectedItemsCsvFilename(items.length);
+  downloadLink.click();
+  URL.revokeObjectURL(objectUrl);
+}
