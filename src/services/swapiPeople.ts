@@ -69,6 +69,7 @@ function personToItem(person: SwapiPerson): SearchResultItem {
     id: extractPersonId(person.url),
     name: person.name,
     description,
+    detailsUrl: person.url,
   };
 }
 

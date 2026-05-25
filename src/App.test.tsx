@@ -6,6 +6,7 @@ import { renderWithProviders } from './test-utils/renderWithProviders';
 import PersonDetailsPanel from './pages/PersonDetailsPanel';
 import { useSearchStorage } from './hooks/useSearchStorage';
 import { fetchPeoplePage, fetchPersonById } from './services/swapiPeople';
+import { createSearchResultItem } from './test-utils/createSearchResultItem';
 
 vi.mock('./services/swapiPeople', () => ({
   fetchPeoplePage: vi.fn(),
@@ -44,7 +45,7 @@ describe('HomePage', () => {
       saveTrimmedSearch: vi.fn(),
     });
     vi.mocked(fetchPeoplePage).mockResolvedValue({
-      items: [{ id: '1', name: 'Luke Skywalker', description: 'Jedi' }],
+      items: [createSearchResultItem('1', 'Luke Skywalker', 'Jedi')],
       currentPage: 1,
       totalPages: 1,
     });
@@ -68,7 +69,7 @@ describe('HomePage', () => {
       saveTrimmedSearch,
     });
     vi.mocked(fetchPeoplePage).mockResolvedValue({
-      items: [{ id: '2', name: 'Leia Organa', description: 'Leader' }],
+      items: [createSearchResultItem('2', 'Leia Organa', 'Leader')],
       currentPage: 1,
       totalPages: 1,
     });
@@ -98,12 +99,12 @@ describe('HomePage', () => {
     const user = userEvent.setup();
     vi.mocked(fetchPeoplePage)
       .mockResolvedValueOnce({
-        items: [{ id: '1', name: 'Person One', description: 'First page' }],
+        items: [createSearchResultItem('1', 'Person One', 'First page')],
         currentPage: 1,
         totalPages: 2,
       })
       .mockResolvedValueOnce({
-        items: [{ id: '2', name: 'Person Two', description: 'Second page' }],
+        items: [createSearchResultItem('2', 'Person Two', 'Second page')],
         currentPage: 2,
         totalPages: 2,
       });
@@ -125,15 +126,13 @@ describe('HomePage', () => {
   it('sets details query param when a result card is selected', async () => {
     const user = userEvent.setup();
     vi.mocked(fetchPeoplePage).mockResolvedValue({
-      items: [{ id: '10', name: 'Han Solo', description: 'Smuggler' }],
+      items: [createSearchResultItem('10', 'Han Solo', 'Smuggler')],
       currentPage: 1,
       totalPages: 1,
     });
-    vi.mocked(fetchPersonById).mockResolvedValue({
-      id: '10',
-      name: 'Han Solo',
-      description: 'Smuggler details',
-    });
+    vi.mocked(fetchPersonById).mockResolvedValue(
+      createSearchResultItem('10', 'Han Solo', 'Smuggler details'),
+    );
 
     renderHomePage();
 

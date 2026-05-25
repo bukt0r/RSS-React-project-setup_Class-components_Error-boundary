@@ -17,8 +17,10 @@ vi.mock('../services/searchStorage', () => ({
   writeStoredSearchTrimmed: vi.fn(),
 }));
 
-const luke = { id: '1', name: 'Luke Skywalker', description: 'Jedi' };
-const leia = { id: '2', name: 'Leia Organa', description: 'Leader' };
+import { createSearchResultItem } from '../test-utils/createSearchResultItem';
+
+const luke = createSearchResultItem('1', 'Luke Skywalker', 'Jedi');
+const leia = createSearchResultItem('2', 'Leia Organa', 'Leader');
 
 function renderApp(initialPath = '/?page=1') {
   return renderWithProviders(
@@ -37,11 +39,9 @@ describe('HomePage item selection', () => {
       currentPage: 1,
       totalPages: 1,
     });
-    vi.mocked(fetchPersonById).mockResolvedValue({
-      id: '1',
-      name: 'Luke Skywalker',
-      description: 'Jedi details',
-    });
+    vi.mocked(fetchPersonById).mockResolvedValue(
+      createSearchResultItem('1', 'Luke Skywalker', 'Jedi details'),
+    );
   });
 
   async function waitForResults(): Promise<void> {

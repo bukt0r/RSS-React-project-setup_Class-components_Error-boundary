@@ -1,12 +1,9 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Card from './Card';
+import { createSearchResultItem } from '../test-utils/createSearchResultItem';
 
-const sampleItem = {
-  id: '5',
-  name: 'Leia',
-  description: 'Princess',
-};
+const sampleItem = createSearchResultItem('5', 'Leia', 'Princess');
 
 describe('Card', () => {
   it('renders item name and description', () => {
@@ -68,11 +65,7 @@ describe('Card', () => {
   it('renders when name and description are empty strings', () => {
     render(
       <Card
-        item={{
-          id: '2',
-          name: '',
-          description: '',
-        }}
+        item={createSearchResultItem('2', '', '')}
         isChecked={false}
         isDetailsActive={false}
         onToggleCheck={vi.fn()}

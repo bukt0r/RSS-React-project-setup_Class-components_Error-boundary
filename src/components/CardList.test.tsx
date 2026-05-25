@@ -1,5 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import CardList from './CardList';
+import { createSearchResultItem } from '../test-utils/createSearchResultItem';
 
 const defaultHandlers = {
   detailsId: null,
@@ -21,8 +22,8 @@ describe('CardList', () => {
     render(
       <CardList
         items={[
-          { id: '1', name: 'First', description: 'Desc A' },
-          { id: '2', name: 'Second', description: 'Desc B' },
+          createSearchResultItem('1', 'First', 'Desc A'),
+          createSearchResultItem('2', 'Second', 'Desc B'),
         ]}
         {...defaultHandlers}
       />,
@@ -45,7 +46,7 @@ describe('CardList', () => {
   it('reflects checked state from isItemChecked', () => {
     render(
       <CardList
-        items={[{ id: '1', name: 'First', description: 'Desc A' }]}
+        items={[createSearchResultItem('1', 'First', 'Desc A')]}
         {...defaultHandlers}
         isItemChecked={(id) => id === '1'}
       />,
@@ -58,8 +59,8 @@ describe('CardList', () => {
     render(
       <CardList
         items={[
-          { id: '1', name: 'Same', description: 'One' },
-          { id: '2', name: 'Same', description: 'Two' },
+          createSearchResultItem('1', 'Same', 'One'),
+          createSearchResultItem('2', 'Same', 'Two'),
         ]}
         {...defaultHandlers}
         detailsId="2"

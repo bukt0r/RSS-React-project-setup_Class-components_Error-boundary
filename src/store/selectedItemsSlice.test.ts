@@ -9,17 +9,10 @@ import {
 } from './selectedItemsSelectors';
 import type { RootState } from './store';
 
-const luke = {
-  id: '1',
-  name: 'Luke Skywalker',
-  description: 'Jedi',
-};
+import { createSearchResultItem } from '../test-utils/createSearchResultItem';
 
-const leia = {
-  id: '2',
-  name: 'Leia Organa',
-  description: 'Leader',
-};
+const luke = createSearchResultItem('1', 'Luke Skywalker', 'Jedi');
+const leia = createSearchResultItem('2', 'Leia Organa', 'Leader');
 
 function createState(
   byId: RootState['selectedItems']['byId'] = {},

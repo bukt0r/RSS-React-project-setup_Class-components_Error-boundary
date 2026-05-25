@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import PersonDetailsPanel from './PersonDetailsPanel';
 import { fetchPersonById } from '../services/swapiPeople';
+import { createSearchResultItem } from '../test-utils/createSearchResultItem';
 
 vi.mock('../services/swapiPeople', () => ({
   fetchPersonById: vi.fn(),
@@ -31,11 +32,9 @@ describe('PersonDetailsPanel', () => {
   });
 
   it('loads and displays person details for details id', async () => {
-    vi.mocked(fetchPersonById).mockResolvedValue({
-      id: '1',
-      name: 'Luke Skywalker',
-      description: 'Jedi master',
-    });
+    vi.mocked(fetchPersonById).mockResolvedValue(
+      createSearchResultItem('1', 'Luke Skywalker', 'Jedi master'),
+    );
 
     renderPanel();
 
@@ -50,11 +49,9 @@ describe('PersonDetailsPanel', () => {
 
   it('removes details param when close button is clicked', async () => {
     const user = userEvent.setup();
-    vi.mocked(fetchPersonById).mockResolvedValue({
-      id: '1',
-      name: 'Luke Skywalker',
-      description: 'Jedi master',
-    });
+    vi.mocked(fetchPersonById).mockResolvedValue(
+      createSearchResultItem('1', 'Luke Skywalker', 'Jedi master'),
+    );
 
     renderPanel();
 

@@ -5,6 +5,7 @@ import App from './App';
 import { renderWithProviders } from './test-utils/renderWithProviders';
 import { fetchPeoplePage, fetchPersonById } from './services/swapiPeople';
 import { readStoredSearchRaw } from './services/searchStorage';
+import { createSearchResultItem } from './test-utils/createSearchResultItem';
 
 vi.mock('./services/swapiPeople', () => ({
   fetchPeoplePage: vi.fn(),
@@ -34,11 +35,9 @@ describe('App routing', () => {
       currentPage: 1,
       totalPages: 1,
     });
-    vi.mocked(fetchPersonById).mockResolvedValue({
-      id: '1',
-      name: 'Luke Skywalker',
-      description: 'Jedi',
-    });
+    vi.mocked(fetchPersonById).mockResolvedValue(
+      createSearchResultItem('1', 'Luke Skywalker', 'Jedi'),
+    );
   });
 
   it('renders About page with author and course link', () => {

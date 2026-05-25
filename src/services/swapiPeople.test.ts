@@ -54,6 +54,7 @@ describe('swapiPeople service', () => {
           name: 'Luke Skywalker',
           description:
             'Gender: male · Birth year: 19BBY · Height: 172 cm · Mass: 77 kg · Hair: blond',
+          detailsUrl: 'https://swapi.py4e.com/api/people/1/',
         },
       ],
       currentPage: 1,
@@ -131,6 +132,7 @@ describe('swapiPeople service', () => {
         name: 'Luke Skywalker',
         description:
           'Gender: male · Birth year: 19BBY · Height: 172 cm · Mass: 77 kg · Hair: blond',
+        detailsUrl: 'https://swapi.py4e.com/api/people/1/',
       },
     ]);
   });

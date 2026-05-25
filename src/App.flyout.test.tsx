@@ -5,6 +5,7 @@ import App from './App';
 import { renderWithProviders } from './test-utils/renderWithProviders';
 import { fetchPeoplePage } from './services/swapiPeople';
 import { readStoredSearchRaw } from './services/searchStorage';
+import { createSearchResultItem } from './test-utils/createSearchResultItem';
 
 vi.mock('./services/swapiPeople', () => ({
   fetchPeoplePage: vi.fn(),
@@ -39,8 +40,8 @@ describe('Selection flyout', () => {
     vi.mocked(readStoredSearchRaw).mockReturnValue(null);
     vi.mocked(fetchPeoplePage).mockResolvedValue({
       items: [
-        { id: '1', name: 'Luke Skywalker', description: 'Jedi' },
-        { id: '2', name: 'Leia Organa', description: 'Leader' },
+        createSearchResultItem('1', 'Luke Skywalker', 'Jedi'),
+        createSearchResultItem('2', 'Leia Organa', 'Leader'),
       ],
       currentPage: 1,
       totalPages: 1,
