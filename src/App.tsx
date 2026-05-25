@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { NavLink, Route, Routes } from 'react-router-dom';
 import SelectionFlyout from './components/SelectionFlyout';
+import ThemeSwitcher from './components/ThemeSwitcher';
 import AboutPage from './pages/AboutPage';
 import HomePage from './pages/HomePage';
 import PersonDetailsPanel from './pages/PersonDetailsPanel';
@@ -38,6 +39,7 @@ function App() {
             About
           </NavLink>
         </nav>
+        <ThemeSwitcher />
       </header>
 
       <Routes>
