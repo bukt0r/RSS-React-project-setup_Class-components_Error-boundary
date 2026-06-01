@@ -8,6 +8,7 @@ import {
   selectSelectedItemsCount,
 } from './selectedItemsSelectors';
 import type { RootState } from './store';
+import { swapiApi } from '../api/swapiApi';
 
 import { createSearchResultItem } from '../test-utils/createSearchResultItem';
 
@@ -19,6 +20,7 @@ function createState(
 ): RootState {
   return {
     selectedItems: { byId },
+    [swapiApi.reducerPath]: swapiApi.reducer(undefined, { type: 'init' }),
   };
 }
 

@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { render, type RenderOptions } from '@testing-library/react';
 import type { ReactElement, ReactNode } from 'react';
 import { Provider } from 'react-redux';
+import { swapiApi } from '../api/swapiApi';
 import ThemeProvider from '../context/ThemeProvider';
 import selectedItemsReducer from '../store/selectedItemsSlice';
 import type { AppStore } from '../store/store';
@@ -14,7 +15,10 @@ export function setupStore(): AppStore {
   return configureStore({
     reducer: {
       selectedItems: selectedItemsReducer,
+      [swapiApi.reducerPath]: swapiApi.reducer,
     },
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().concat(swapiApi.middleware),
   });
 }
 
