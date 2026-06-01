@@ -66,4 +66,65 @@ describe('PersonDetailsPanel', () => {
 
     expect(screen.queryByRole('heading', { level: 3, name: 'Luke Skywalker' })).not.toBeInTheDocument();
   });
+
+  it('shows loading indicator while person details query is in flight', async () => {
+    let resolveFetch: (value: Awaited<ReturnType<typeof fetchPersonById>>) => void =
+      () => undefined;
+
+    vi.mocked(fetchPersonById).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        }),
+    );
+
+    renderPanel();
+
+    expect(screen.getByText('Loading details')).toBeInTheDocument();
+
+    resolveFetch(createSearchResultItem('1', 'Luke Skywalker', 'Jedi master'));
+
+    await waitFor(() => {
+      expect(screen.queryByText('Loading details')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows error message when person details query fails', async () => {
+    vi.mocked(fetchPersonById).mockRejectedValue(
+      new Error('Unable to load details. Please try again.'),
+    );
+
+    renderPanel();
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('Unable to load details. Please try again.'),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('refetches person details after manual refresh invalidates cache', async () => {
+    const user = userEvent.setup();
+    vi.mocked(fetchPersonById)
+      .mockResolvedValueOnce(
+        createSearchResultItem('1', 'Luke Skywalker', 'Jedi master'),
+      )
+      .mockResolvedValueOnce(
+        createSearchResultItem('1', 'Luke Skywalker', 'Updated master'),
+      );
+
+    renderPanel();
+
+    await waitFor(() => {
+      expect(screen.getByText('Jedi master')).toBeInTheDocument();
+    });
+    expect(fetchPersonById).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByRole('button', { name: 'Refresh' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Updated master')).toBeInTheDocument();
+    });
+    expect(fetchPersonById).toHaveBeenCalledTimes(2);
+  });
 });
