@@ -1,18 +1,17 @@
 import {
   useCallback,
   useEffect,
-  useRef,
   useState,
   type ChangeEvent,
 } from 'react';
 import { Outlet, useSearchParams } from 'react-router-dom';
+import { useGetPeoplePageQuery } from '../api/swapiApi';
 import CardList from '../components/CardList';
 import ErrorBanner from '../components/ErrorBanner';
 import ErrorSpike from '../components/ErrorSpike';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
 import { useSearchStorage } from '../hooks/useSearchStorage';
-import { fetchPeoplePage, SwapiHttpError } from '../services/swapiPeople';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { selectSelectedItemsById } from '../store/selectedItemsSelectors';
 import { toggleSelectedItem } from '../store/selectedItemsSlice';
@@ -33,7 +32,6 @@ function HomePage() {
   const selectedItemsById = useAppSelector(selectSelectedItemsById);
   const { readStoredSearch, saveTrimmedSearch } = useSearchStorage();
   const [searchParams, setSearchParams] = useSearchParams();
-  const isMountedRef = useRef(true);
 
   const [searchInput, setSearchInput] = useState(
     () => readStoredSearch() ?? '',
@@ -41,16 +39,32 @@ function HomePage() {
   const [committedSearch, setCommittedSearch] = useState(
     () => readStoredSearch() ?? '',
   );
-  const [results, setResults] = useState<SearchResultItem[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [fetchError, setFetchError] = useState<string | null>(null);
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [simulateCrash, setSimulateCrash] = useState(false);
 
+  const hasPageParam = Boolean(searchParams.get('page'));
   const currentPage = parsePageParam(searchParams.get('page'));
   const selectedDetailsId = searchParams.get('details');
   const isDetailsOpen = selectedDetailsId !== null;
+  const {
+    data: peoplePageData,
+    isFetching,
+    isSuccess,
+    isError,
+    error,
+  } = useGetPeoplePageQuery(
+    { searchFromInput: committedSearch, page: currentPage },
+    { skip: !hasPageParam },
+  );
+  const results = peoplePageData?.items ?? [];
+  const totalPages = peoplePageData?.totalPages ?? 1;
+  const isLoading = isFetching;
+  const fetchError =
+    error instanceof Error
+      ? error.message
+      : isError
+        ? 'Unable to load data. Please try again.'
+        : null;
+  const hasLoadedOnce = isSuccess || isError;
 
   const closeDetails = useCallback((): void => {
     setSearchParams(
@@ -92,57 +106,11 @@ function HomePage() {
     [setSearchParams],
   );
 
-  const fetchResults = useCallback(
-    async (query: string, page: number) => {
-      setIsLoading(true);
-      setFetchError(null);
-
-      try {
-        const data = await fetchPeoplePage(query, page);
-        if (!isMountedRef.current) return;
-        setResults(data.items);
-        setTotalPages(data.totalPages);
-        setFetchError(null);
-        setHasLoadedOnce(true);
-      } catch (error: unknown) {
-        if (!isMountedRef.current) return;
-        const message =
-          error instanceof SwapiHttpError
-            ? error.message
-            : 'Unable to load data. Please try again.';
-        setResults([]);
-        setFetchError(message);
-        setHasLoadedOnce(true);
-      } finally {
-        if (isMountedRef.current) {
-          setIsLoading(false);
-        }
-      }
-    },
-    [],
-  );
-
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
   useEffect(() => {
     if (!searchParams.get('page')) {
       updatePageInUrl(1);
     }
   }, [searchParams, updatePageInUrl]);
-
-  useEffect(() => {
-    if (!searchParams.get('page')) {
-      return;
-    }
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch when URL page or query changes
-    void fetchResults(committedSearch, currentPage);
-  }, [committedSearch, currentPage, fetchResults, searchParams]);
 
   const handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const nextValue = event.target.value;

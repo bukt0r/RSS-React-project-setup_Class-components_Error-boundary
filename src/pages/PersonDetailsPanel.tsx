@@ -1,19 +1,26 @@
-import { useEffect, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useGetPersonByIdQuery } from '../api/swapiApi';
 import ErrorBanner from '../components/ErrorBanner';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { fetchPersonById, SwapiHttpError } from '../services/swapiPeople';
-import type { SearchResultItem } from '../types/item';
 import './PersonDetailsPanel.css';
 
 function PersonDetailsPanel() {
   const [searchParams, setSearchParams] = useSearchParams();
   const detailsId = searchParams.get('details');
-  const isMountedRef = useRef(true);
-
-  const [person, setPerson] = useState<SearchResultItem | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [fetchError, setFetchError] = useState<string | null>(null);
+  const { data: person, isFetching, isError, error } = useGetPersonByIdQuery(
+    detailsId ?? '',
+    { skip: !detailsId },
+  );
+  const fetchError = useMemo(() => {
+    if (!isError) {
+      return null;
+    }
+    return error instanceof Error
+      ? error.message
+      : 'Unable to load details. Please try again.';
+  }, [error, isError]);
+  const isLoading = isFetching;
 
   const closeDetails = (): void => {
     setSearchParams(
@@ -25,45 +32,6 @@ function PersonDetailsPanel() {
       { replace: true },
     );
   };
-
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!detailsId) {
-      return;
-    }
-
-    const loadDetails = async (): Promise<void> => {
-      setIsLoading(true);
-      setFetchError(null);
-
-      try {
-        const data = await fetchPersonById(detailsId);
-        if (!isMountedRef.current) return;
-        setPerson(data);
-        setFetchError(null);
-      } catch (error: unknown) {
-        if (!isMountedRef.current) return;
-        const message =
-          error instanceof SwapiHttpError
-            ? error.message
-            : 'Unable to load details. Please try again.';
-        setPerson(null);
-        setFetchError(message);
-      } finally {
-        if (isMountedRef.current) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    void loadDetails();
-  }, [detailsId]);
 
   if (!detailsId) {
     return null;

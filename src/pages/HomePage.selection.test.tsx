@@ -86,7 +86,9 @@ describe('HomePage item selection', () => {
       expect(fetchPersonById).toHaveBeenCalledWith('1');
     });
     expect(lukeCheckbox).not.toBeChecked();
-    expect(screen.getByText('Jedi details')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Jedi details')).toBeInTheDocument();
+    });
   });
 
   it('does not open details when only the checkbox is clicked', async () => {

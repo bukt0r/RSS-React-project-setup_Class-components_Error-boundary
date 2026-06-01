@@ -1,24 +1,7 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react';
 import { getSwapiCacheTtlSeconds } from '../config/queryConfig';
+import { fetchPeoplePage, fetchPersonById } from '../services/swapiPeople';
 import type { SearchResultItem } from '../types/item';
-
-const SWAPI_BASE_URL = 'https://swapi.py4e.com/api/';
-const SWAPI_PAGE_SIZE = 10;
-
-interface SwapiPerson {
-  url: string;
-  name: string;
-  height: string;
-  mass: string;
-  hair_color: string;
-  gender: string;
-  birth_year: string;
-}
-
-interface SwapiPeopleListResponse {
-  count?: number;
-  results?: SwapiPerson[];
-}
 
 export interface PeoplePageResult {
   items: SearchResultItem[];
@@ -31,67 +14,20 @@ export interface PeoplePageQueryArg {
   page: number;
 }
 
-function extractPersonId(url: string): string {
-  const segments = url.replace(/\/$/, '').split('/');
-  return segments.at(-1) ?? '';
-}
-
-function personToItem(person: SwapiPerson): SearchResultItem {
-  const description = [
-    `Gender: ${person.gender}`,
-    `Birth year: ${person.birth_year}`,
-    `Height: ${person.height} cm`,
-    `Mass: ${person.mass} kg`,
-    `Hair: ${person.hair_color}`,
-  ].join(' · ');
-
-  return {
-    id: extractPersonId(person.url),
-    name: person.name,
-    description,
-    detailsUrl: person.url,
-  };
-}
-
 export const swapiApi = createApi({
   reducerPath: 'swapiApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: SWAPI_BASE_URL,
-  }),
+  baseQuery: fakeBaseQuery<Error>(),
   tagTypes: ['PeoplePage', 'Person'],
   keepUnusedDataFor: getSwapiCacheTtlSeconds(),
   endpoints: (builder) => ({
     getPeoplePage: builder.query<PeoplePageResult, PeoplePageQueryArg>({
-      query: ({ searchFromInput, page }) => {
-        const trimmed = searchFromInput.trim();
-        const safePage = Math.max(1, Math.floor(page));
-        const params = new URLSearchParams();
-
-        if (trimmed.length > 0) {
-          params.set('search', trimmed);
+      async queryFn({ searchFromInput, page }) {
+        try {
+          const data = await fetchPeoplePage(searchFromInput, page);
+          return { data };
+        } catch (error: unknown) {
+          return { error: error as Error };
         }
-        if (safePage > 1) {
-          params.set('page', String(safePage));
-        }
-
-        const queryString = params.toString();
-        const url = queryString ? `people/?${queryString}` : 'people/';
-        return { url };
-      },
-      transformResponse: (
-        response: SwapiPeopleListResponse,
-        _meta,
-        arg,
-      ): PeoplePageResult => {
-        const people = response.results ?? [];
-        const count = response.count ?? people.length;
-        const totalPages = Math.max(1, Math.ceil(count / SWAPI_PAGE_SIZE));
-
-        return {
-          items: people.map(personToItem),
-          currentPage: Math.max(1, Math.floor(arg.page)),
-          totalPages,
-        };
       },
       providesTags: (result, _error, arg) => [
         { type: 'PeoplePage', id: `${arg.searchFromInput.trim()}::${arg.page}` },
@@ -100,9 +36,14 @@ export const swapiApi = createApi({
       ],
     }),
     getPersonById: builder.query<SearchResultItem, string>({
-      query: (id) => `people/${id}/`,
-      transformResponse: (response: SwapiPerson): SearchResultItem =>
-        personToItem(response),
+      async queryFn(id) {
+        try {
+          const data = await fetchPersonById(id);
+          return { data };
+        } catch (error: unknown) {
+          return { error: error as Error };
+        }
+      },
       providesTags: (_result, _error, id) => [{ type: 'Person', id }],
     }),
   }),

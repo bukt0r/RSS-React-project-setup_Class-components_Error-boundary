@@ -1,9 +1,10 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import PersonDetailsPanel from './PersonDetailsPanel';
 import { fetchPersonById } from '../services/swapiPeople';
 import { createSearchResultItem } from '../test-utils/createSearchResultItem';
+import { renderWithProviders } from '../test-utils/renderWithProviders';
 
 vi.mock('../services/swapiPeople', () => ({
   fetchPersonById: vi.fn(),
@@ -11,7 +12,7 @@ vi.mock('../services/swapiPeople', () => ({
 }));
 
 function renderPanel(initialPath = '/?page=1&details=1') {
-  return render(
+  return renderWithProviders(
     <MemoryRouter initialEntries={[initialPath]}>
       <Routes>
         <Route path="/" element={<PersonDetailsPanel />} />
@@ -41,9 +42,11 @@ describe('PersonDetailsPanel', () => {
     await waitFor(() => {
       expect(fetchPersonById).toHaveBeenCalledWith('1');
     });
-    expect(
-      screen.getByRole('heading', { level: 3, name: 'Luke Skywalker' }),
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { level: 3, name: 'Luke Skywalker' }),
+      ).toBeInTheDocument();
+    });
     expect(screen.getByText('Jedi master')).toBeInTheDocument();
   });
 

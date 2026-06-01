@@ -56,9 +56,11 @@ describe('HomePage', () => {
       expect(fetchPeoplePage).toHaveBeenCalledWith('Luke', 1);
     });
     expect(screen.getByDisplayValue('Luke')).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { level: 3, name: 'Luke Skywalker' }),
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { level: 3, name: 'Luke Skywalker' }),
+      ).toBeInTheDocument();
+    });
   });
 
   it('submits trimmed query, persists it and renders results', async () => {
@@ -120,7 +122,9 @@ describe('HomePage', () => {
     await waitFor(() => {
       expect(fetchPeoplePage).toHaveBeenLastCalledWith('', 2);
     });
-    expect(screen.getByText('Page 2 of 2')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Page 2 of 2')).toBeInTheDocument();
+    });
   });
 
   it('sets details query param when a result card is selected', async () => {
@@ -145,6 +149,8 @@ describe('HomePage', () => {
     await waitFor(() => {
       expect(fetchPersonById).toHaveBeenCalledWith('10');
     });
-    expect(screen.getByText('Smuggler details')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Smuggler details')).toBeInTheDocument();
+    });
   });
 });
