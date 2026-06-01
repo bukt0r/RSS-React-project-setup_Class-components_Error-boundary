@@ -4,5 +4,5 @@ This repository contains a training project for [**The Rolling Scopes School**](
 
 ## Deployment
 
-- Production: https://class-componentserror-boundary.vercel.app/
+- Production: https://rss-react-seven.vercel.app/?page=1
 - Platform: Vercel
