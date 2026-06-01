@@ -5,7 +5,7 @@ import {
   type ChangeEvent,
 } from 'react';
 import { Outlet, useSearchParams } from 'react-router-dom';
-import { useGetPeoplePageQuery } from '../api/swapiApi';
+import { swapiApi, useGetPeoplePageQuery } from '../api/swapiApi';
 import CardList from '../components/CardList';
 import ErrorBanner from '../components/ErrorBanner';
 import ErrorSpike from '../components/ErrorSpike';
@@ -146,6 +146,14 @@ function HomePage() {
     updatePageInUrl(page);
   };
 
+  const handleRefreshResults = (): void => {
+    dispatch(
+      swapiApi.util.invalidateTags([
+        { type: 'PeoplePage', id: `${committedSearch.trim()}::${currentPage}` },
+      ]),
+    );
+  };
+
   const handleTestErrorClick = (): void => {
     setSimulateCrash(true);
   };
@@ -193,6 +201,13 @@ function HomePage() {
             disabled={isLoading}
           >
             Search
+          </button>
+          <button
+            type="button"
+            onClick={handleRefreshResults}
+            disabled={isLoading || !hasPageParam}
+          >
+            Refresh
           </button>
         </div>
       </section>

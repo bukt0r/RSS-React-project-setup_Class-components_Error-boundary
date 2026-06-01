@@ -37,6 +37,20 @@
   border-color: var(--accent-border);
 }
 
+.person-details__refresh {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font: inherit;
+  cursor: pointer;
+}
+
+.person-details__refresh:hover {
+  border-color: var(--accent);
+}
+
 .person-details__loading {
   display: flex;
   align-items: center;

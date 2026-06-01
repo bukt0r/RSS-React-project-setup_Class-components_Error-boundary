@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useGetPersonByIdQuery } from '../api/swapiApi';
+import { swapiApi, useGetPersonByIdQuery } from '../api/swapiApi';
 import ErrorBanner from '../components/ErrorBanner';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useAppDispatch } from '../store/hooks';
 import './PersonDetailsPanel.css';
 
 function PersonDetailsPanel() {
+  const dispatch = useAppDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
   const detailsId = searchParams.get('details');
   const { data: person, isFetching, isError, error } = useGetPersonByIdQuery(
@@ -33,6 +35,13 @@ function PersonDetailsPanel() {
     );
   };
 
+  const handleRefreshDetails = (): void => {
+    if (!detailsId) {
+      return;
+    }
+    dispatch(swapiApi.util.invalidateTags([{ type: 'Person', id: detailsId }]));
+  };
+
   if (!detailsId) {
     return null;
   }
@@ -53,6 +62,14 @@ function PersonDetailsPanel() {
           aria-label="Close details"
         >
           Close
+        </button>
+        <button
+          type="button"
+          className="person-details__refresh"
+          onClick={handleRefreshDetails}
+          disabled={isLoading}
+        >
+          Refresh
         </button>
       </div>
 
