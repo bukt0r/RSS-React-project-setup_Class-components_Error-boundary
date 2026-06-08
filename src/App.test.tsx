@@ -12,15 +12,34 @@ describe('App', () => {
     ).toBeInTheDocument();
   });
 
-  it('opens shared modal from the main page', async () => {
+  it('opens uncontrolled form modal from the main page', async () => {
     const user = userEvent.setup();
     renderWithProviders(<App />);
 
-    await user.click(screen.getByRole('button', { name: 'Open modal' }));
+    await user.click(screen.getByRole('button', { name: 'Open uncontrolled form' }));
 
     expect(
-      screen.getByRole('dialog', { name: 'Form modal' }),
+      screen.getByRole('dialog', { name: 'Uncontrolled form' }),
     ).toBeInTheDocument();
+    expect(screen.getByLabelText('Name')).toBeInTheDocument();
+    expect(screen.getByLabelText('Age')).toBeInTheDocument();
+    expect(screen.getByLabelText('Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('I accept terms and conditions')).toBeInTheDocument();
+  });
+
+  it('opens react hook form modal from the main page', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<App />);
+
+    await user.click(screen.getByRole('button', { name: 'Open React Hook Form' }));
+
+    expect(
+      screen.getByRole('dialog', { name: 'React Hook Form' }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText('Name')).toBeInTheDocument();
+    expect(screen.getByLabelText('Age')).toBeInTheDocument();
+    expect(screen.getByLabelText('Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('I accept terms and conditions')).toBeInTheDocument();
   });
 
   it('shows submissions section on the main page', () => {

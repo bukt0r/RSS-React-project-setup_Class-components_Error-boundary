@@ -15,3 +15,37 @@
   font: inherit;
   cursor: pointer;
 }
+
+.app__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.app-form {
+  display: grid;
+  gap: 12px;
+}
+
+.app-form__field {
+  display: grid;
+  gap: 6px;
+}
+
+.app-form__field input[type='text'],
+.app-form__field input[type='number'],
+.app-form__field input[type='email'] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app-form__field--inline {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+}
