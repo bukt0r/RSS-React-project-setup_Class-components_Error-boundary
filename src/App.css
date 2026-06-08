@@ -4,3 +4,14 @@
   padding: 2rem;
   text-align: center;
 }
+
+.app button {
+  margin-top: 1rem;
+  padding: 10px 14px;
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font: inherit;
+  cursor: pointer;
+}
