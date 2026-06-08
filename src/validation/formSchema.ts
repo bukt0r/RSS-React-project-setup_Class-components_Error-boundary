@@ -72,7 +72,7 @@ export const createBasicFormSchema = (countries: string[]) =>
       gender: z.preprocess(normalizeTextValue, z.string()).pipe(
         z.string().min(1, 'Gender is required'),
       ),
-      acceptedTerms: z.literal(true, {
+      acceptedTerms: z.boolean().refine((value) => value, {
         message: 'You must accept terms and conditions',
       }),
       password: z.preprocess(normalizeTextValue, z.string()).pipe(
@@ -98,3 +98,4 @@ export const createBasicFormSchema = (countries: string[]) =>
     });
 
 export type BasicFormValues = z.infer<ReturnType<typeof createBasicFormSchema>>;
+export type BasicFormInput = z.input<ReturnType<typeof createBasicFormSchema>>;

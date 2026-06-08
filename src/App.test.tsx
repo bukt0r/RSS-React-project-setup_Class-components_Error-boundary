@@ -1,7 +1,25 @@
-import { screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import { renderWithProviders } from './test-utils/renderWithProviders';
+
+const fillValidHookForm = async (
+  user: ReturnType<typeof userEvent.setup>,
+): Promise<void> => {
+  await user.type(screen.getByLabelText('Name'), 'John');
+  await user.clear(screen.getByLabelText('Age'));
+  await user.type(screen.getByLabelText('Age'), '20');
+  await user.type(screen.getByLabelText('Email'), 'john@example.com');
+  await user.click(screen.getByLabelText('Male'));
+  await user.click(screen.getByLabelText('I accept terms and conditions'));
+  await user.type(screen.getByLabelText('Password'), 'Strong123!');
+  await user.type(screen.getByLabelText('Confirm password'), 'Strong123!');
+  await user.type(screen.getByLabelText('Country'), 'Canada');
+  await user.upload(
+    screen.getByLabelText('Image (png/jpeg, max 2 MB)'),
+    new File(['image-content'], 'avatar.png', { type: 'image/png' }),
+  );
+};
 
 describe('App', () => {
   it('renders project title', () => {
@@ -73,21 +91,52 @@ describe('App', () => {
     const submitButton = screen.getByRole('button', { name: 'Submit React Hook Form' });
     expect(submitButton).toBeDisabled();
 
-    await user.type(screen.getByLabelText('Name'), 'John');
-    await user.clear(screen.getByLabelText('Age'));
-    await user.type(screen.getByLabelText('Age'), '20');
-    await user.type(screen.getByLabelText('Email'), 'john@example.com');
-    await user.click(screen.getByLabelText('Male'));
+    await fillValidHookForm(user);
+
+    expect(submitButton).toBeEnabled();
+  });
+
+  it('submits RHF form, closes modal, and shows submission on main page', async () => {
+    const user = userEvent.setup();
+    const { container } = renderWithProviders(<App />);
+
+    await user.click(screen.getByRole('button', { name: 'Open React Hook Form' }));
+    await fillValidHookForm(user);
+    await user.click(screen.getByRole('button', { name: 'Submit React Hook Form' }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+    expect(screen.getByRole('heading', { level: 3, name: 'John' })).toBeInTheDocument();
+    expect(screen.getByText('react-hook-form')).toBeInTheDocument();
+    expect(container.querySelector('.submission-card--highlighted')).toBeInTheDocument();
+  });
+
+  it('submits uncontrolled form, closes modal, and shows submission on main page', async () => {
+    const user = userEvent.setup();
+    const { container } = renderWithProviders(<App />);
+
+    await user.click(screen.getByRole('button', { name: 'Open uncontrolled form' }));
+    await user.type(screen.getByLabelText('Name'), 'Anna');
+    await user.type(screen.getByLabelText('Age'), '25');
+    await user.type(screen.getByLabelText('Email'), 'anna@example.com');
+    await user.click(screen.getByLabelText('Female'));
     await user.click(screen.getByLabelText('I accept terms and conditions'));
     await user.type(screen.getByLabelText('Password'), 'Strong123!');
     await user.type(screen.getByLabelText('Confirm password'), 'Strong123!');
-    await user.type(screen.getByLabelText('Country'), 'Canada');
-    const imageFile = new File(['image-content'], 'avatar.png', {
-      type: 'image/png',
+    await user.type(screen.getByLabelText('Country'), 'Ukraine');
+    const imageFile = new File(['image-content'], 'avatar.png', { type: 'image/png' });
+    fireEvent.change(screen.getByLabelText('Image (png/jpeg, max 2 MB)'), {
+      target: { files: [imageFile] },
     });
-    await user.upload(screen.getByLabelText('Image (png/jpeg, max 2 MB)'), imageFile);
+    await user.click(screen.getByRole('button', { name: 'Submit uncontrolled form' }));
 
-    expect(submitButton).toBeEnabled();
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+    expect(screen.getByRole('heading', { level: 3, name: 'Anna' })).toBeInTheDocument();
+    expect(screen.getByText('uncontrolled')).toBeInTheDocument();
+    expect(container.querySelector('.submission-card--highlighted')).toBeInTheDocument();
   });
 
   it('shows submissions section on the main page', () => {

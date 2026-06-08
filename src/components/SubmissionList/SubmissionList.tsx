@@ -2,7 +2,11 @@ import { useAppSelector } from '../../store/hooks';
 import { selectFormSubmissions } from '../../store/selectors';
 import './SubmissionList.css';
 
-function SubmissionList() {
+interface SubmissionListProps {
+  highlightedSubmissionId?: string | null;
+}
+
+function SubmissionList({ highlightedSubmissionId = null }: SubmissionListProps) {
   const submissions = useAppSelector(selectFormSubmissions);
 
   if (submissions.length === 0) {
@@ -22,7 +26,13 @@ function SubmissionList() {
       <ul className="submission-list__grid">
         {submissions.map((submission) => (
           <li key={submission.id} className="submission-list__item">
-            <article className="submission-card">
+            <article
+              className={
+                submission.id === highlightedSubmissionId
+                  ? 'submission-card submission-card--highlighted'
+                  : 'submission-card'
+              }
+            >
               {submission.imageBase64 ? (
                 <img
                   className="submission-card__image"

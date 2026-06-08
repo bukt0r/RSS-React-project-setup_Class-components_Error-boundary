@@ -1,26 +1,38 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 import Modal from './components/Modal/Modal';
 import SubmissionList from './components/SubmissionList/SubmissionList';
-import { useAppSelector } from './store/hooks';
+import { addSubmission } from './store/formSubmissionsSlice';
+import { useAppDispatch, useAppSelector } from './store/hooks';
 import { selectCountries } from './store/selectors';
-import { fileToBase64 } from './utils/fileToBase64';
+import type { FormSource } from './types/formSubmission';
+import { createSubmission } from './utils/createSubmission';
 import { getPasswordStrength } from './utils/passwordStrength';
-import { createBasicFormSchema, type BasicFormValues } from './validation/formSchema';
+import type { ZodIssue } from 'zod';
+import {
+  createBasicFormSchema,
+  type BasicFormInput,
+  type BasicFormValues,
+} from './validation/formSchema';
 import './App.css';
 
 type FormVariant = 'uncontrolled' | 'react-hook-form';
 
 type FormErrors = Partial<Record<keyof BasicFormValues, string>>;
 
+const HIGHLIGHT_DURATION_MS = 3000;
+
 function App() {
+  const dispatch = useAppDispatch();
   const countries = useAppSelector(selectCountries);
   const basicFormSchema = useMemo(() => createBasicFormSchema(countries), [countries]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [variant, setVariant] = useState<FormVariant>('uncontrolled');
   const [uncontrolledErrors, setUncontrolledErrors] = useState<FormErrors>({});
   const [uncontrolledPassword, setUncontrolledPassword] = useState('');
+  const [highlightedSubmissionId, setHighlightedSubmissionId] = useState<string | null>(null);
+  const uncontrolledFormRef = useRef<HTMLFormElement>(null);
 
   const {
     register,
@@ -28,7 +40,7 @@ function App() {
     reset: resetHookForm,
     control,
     formState: { errors: hookFormErrors, isValid },
-  } = useForm<BasicFormValues>({
+  } = useForm<BasicFormInput, unknown, BasicFormValues>({
     resolver: zodResolver(basicFormSchema),
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -43,37 +55,68 @@ function App() {
       country: '',
     },
   });
-  const hookFormPassword = useWatch({ control, name: 'password', defaultValue: '' });
+  const hookFormPassword = useWatch({ control, name: 'password', defaultValue: '' }) as string;
+
+  useEffect(() => {
+    if (!highlightedSubmissionId) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setHighlightedSubmissionId(null);
+    }, HIGHLIGHT_DURATION_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [highlightedSubmissionId]);
+
+  const resetUncontrolledForm = (): void => {
+    uncontrolledFormRef.current?.reset();
+    setUncontrolledPassword('');
+    setUncontrolledErrors({});
+  };
 
   const openModal = (nextVariant: FormVariant): void => {
     setVariant(nextVariant);
-    setUncontrolledErrors({});
-    setUncontrolledPassword('');
+    resetUncontrolledForm();
     resetHookForm();
     setIsModalOpen(true);
   };
 
   const closeModal = (): void => {
     setIsModalOpen(false);
-    setUncontrolledErrors({});
-    setUncontrolledPassword('');
     resetHookForm();
+    resetUncontrolledForm();
   };
 
-  const mapSchemaErrors = (formError: { path: (string | number)[]; message: string }[]): FormErrors =>
+  const mapSchemaErrors = (formError: ZodIssue[]): FormErrors =>
     formError.reduce<FormErrors>((result, issue) => {
-      const key = issue.path[0] as keyof BasicFormValues | undefined;
-      if (!key || result[key]) {
+      const key = issue.path[0];
+      if (typeof key !== 'string' || !key || result[key as keyof BasicFormValues]) {
         return result;
       }
 
-      result[key] = issue.message;
+      result[key as keyof BasicFormValues] = issue.message;
       return result;
     }, {});
 
+  const finishSubmission = async (
+    data: BasicFormValues,
+    source: FormSource,
+  ): Promise<void> => {
+    const submission = await createSubmission(data, source);
+    dispatch(addSubmission(submission));
+    setHighlightedSubmissionId(submission.id);
+    setIsModalOpen(false);
+    resetHookForm();
+  };
+
   const handleUncontrolledSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const imageInput = form.elements.namedItem('imageFile') as HTMLInputElement | null;
     const parseResult = basicFormSchema.safeParse({
       name: formData.get('name'),
       age: formData.get('age'),
@@ -83,7 +126,7 @@ function App() {
       password: formData.get('password'),
       confirmPassword: formData.get('confirmPassword'),
       country: formData.get('country'),
-      imageFile: formData.get('imageFile'),
+      imageFile: imageInput?.files?.[0] ?? formData.get('imageFile'),
     });
 
     if (!parseResult.success) {
@@ -91,13 +134,12 @@ function App() {
       return;
     }
 
-    setUncontrolledErrors({});
-    await fileToBase64(parseResult.data.imageFile);
+    await finishSubmission(parseResult.data, 'uncontrolled');
+    resetUncontrolledForm();
   };
 
   const handleHookFormSubmit = async (data: BasicFormValues): Promise<void> => {
-    await fileToBase64(data.imageFile);
-    void data;
+    await finishSubmission(data, 'react-hook-form');
   };
 
   return (
@@ -119,7 +161,11 @@ function App() {
         onClose={closeModal}
       >
         {variant === 'uncontrolled' ? (
-          <form className="app-form" onSubmit={handleUncontrolledSubmit}>
+          <form
+            ref={uncontrolledFormRef}
+            className="app-form"
+            onSubmit={handleUncontrolledSubmit}
+          >
             <div className="app-form__field">
               <label htmlFor="name-uncontrolled">Name</label>
               <input id="name-uncontrolled" name="name" type="text" />
@@ -389,7 +435,7 @@ function App() {
         )}
       </Modal>
 
-      <SubmissionList />
+      <SubmissionList highlightedSubmissionId={highlightedSubmissionId} />
     </main>
   );
 }

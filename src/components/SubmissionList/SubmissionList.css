@@ -69,3 +69,20 @@
   line-height: 1.4;
   color: var(--text);
 }
+
+.submission-card--highlighted {
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 2px var(--accent-bg);
+  animation: submission-highlight 3s ease-out;
+}
+
+@keyframes submission-highlight {
+  0%,
+  35% {
+    background: var(--accent-bg);
+  }
+
+  100% {
+    background: var(--social-bg);
+  }
+}

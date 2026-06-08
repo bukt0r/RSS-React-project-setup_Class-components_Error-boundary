@@ -38,4 +38,16 @@ describe('SubmissionList', () => {
       screen.getByText('leia@example.com · 30 · United Kingdom'),
     ).toBeInTheDocument();
   });
+
+  it('highlights the newest submission card', () => {
+    const store = setupStore();
+    store.dispatch(addSubmission(sampleSubmission));
+
+    const { container } = renderWithProviders(
+      <SubmissionList highlightedSubmissionId="1" />,
+      { store },
+    );
+
+    expect(container.querySelector('.submission-card--highlighted')).toBeInTheDocument();
+  });
 });
