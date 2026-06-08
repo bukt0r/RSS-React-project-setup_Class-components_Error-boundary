@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isValidEmail } from './emailValidation';
 
 const upperCaseFirstLetter = (value: string): boolean => {
   const trimmed = value.trim();
@@ -67,7 +68,11 @@ export const createBasicFormSchema = (countries: string[]) =>
         z.number({ message: 'Age is required' }).min(0, 'Age must be zero or greater'),
       ),
       email: z.preprocess(normalizeTextValue, z.string()).pipe(
-        z.string().trim().min(1, 'Email is required').email('Email is invalid'),
+        z
+          .string()
+          .trim()
+          .min(1, 'Email is required')
+          .refine(isValidEmail, 'Email is invalid'),
       ),
       gender: z.preprocess(normalizeTextValue, z.string()).pipe(
         z.string().min(1, 'Gender is required'),

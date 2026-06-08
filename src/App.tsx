@@ -2,13 +2,13 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 import Modal from './components/Modal/Modal';
+import PasswordStrengthIndicator from './components/PasswordStrengthIndicator/PasswordStrengthIndicator';
 import SubmissionList from './components/SubmissionList/SubmissionList';
 import { addSubmission } from './store/formSubmissionsSlice';
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { selectCountries } from './store/selectors';
 import type { FormSource } from './types/formSubmission';
 import { createSubmission } from './utils/createSubmission';
-import { getPasswordStrength } from './utils/passwordStrength';
 import type { ZodIssue } from 'zod';
 import {
   createBasicFormSchema,
@@ -241,9 +241,7 @@ function App() {
                 type="password"
                 onChange={(event) => setUncontrolledPassword(event.target.value)}
               />
-              <p className="app-form__hint">
-                Strength: {getPasswordStrength(uncontrolledPassword)}
-              </p>
+              <PasswordStrengthIndicator password={uncontrolledPassword} />
               {uncontrolledErrors.password ? (
                 <p className="app-form__error" role="alert">
                   {uncontrolledErrors.password}
@@ -375,7 +373,7 @@ function App() {
             <div className="app-form__field">
               <label htmlFor="password-hook-form">Password</label>
               <input id="password-hook-form" type="password" {...register('password')} />
-              <p className="app-form__hint">Strength: {getPasswordStrength(hookFormPassword ?? '')}</p>
+              <PasswordStrengthIndicator password={hookFormPassword ?? ''} />
               {hookFormErrors.password ? (
                 <p className="app-form__error" role="alert">
                   {hookFormErrors.password.message}

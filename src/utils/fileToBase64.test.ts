@@ -18,7 +18,7 @@ describe('fileToBase64', () => {
           value: new ArrayBuffer(8),
           configurable: true,
         });
-        this.onload?.(new ProgressEvent('load'));
+        this.onload?.(new ProgressEvent('load') as ProgressEvent<FileReader>);
       });
 
     await expect(fileToBase64(file)).rejects.toThrow('Failed to convert file to base64');
@@ -31,7 +31,7 @@ describe('fileToBase64', () => {
     const readAsDataURL = vi
       .spyOn(FileReader.prototype, 'readAsDataURL')
       .mockImplementation(function readAsDataURLMock(this: FileReader) {
-        this.onerror?.(new ProgressEvent('error'));
+        this.onerror?.(new ProgressEvent('error') as ProgressEvent<FileReader>);
       });
 
     await expect(fileToBase64(file)).rejects.toThrow('Failed to read file');

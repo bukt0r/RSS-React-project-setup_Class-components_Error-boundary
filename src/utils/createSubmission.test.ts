@@ -16,7 +16,9 @@ const formData: BasicFormValues = {
 
 describe('createSubmission', () => {
   it('builds a submission with base64 image and metadata', async () => {
-    const uuidSpy = vi.spyOn(crypto, 'randomUUID').mockReturnValue('submission-id');
+    const uuidSpy = vi
+      .spyOn(crypto, 'randomUUID')
+      .mockReturnValue('00000000-0000-4000-8000-000000000001');
     const dateSpy = vi.spyOn(Date, 'now').mockReturnValue(1_700_000_000_000);
     const fileSpy = vi
       .spyOn(fileToBase64Module, 'fileToBase64')
@@ -26,7 +28,7 @@ describe('createSubmission', () => {
 
     expect(fileSpy).toHaveBeenCalledWith(formData.imageFile);
     expect(submission).toEqual({
-      id: 'submission-id',
+      id: '00000000-0000-4000-8000-000000000001',
       source: 'uncontrolled',
       name: 'Anna',
       age: 25,
