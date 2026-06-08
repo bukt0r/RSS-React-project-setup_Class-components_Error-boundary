@@ -1,9 +1,13 @@
-import { useState, type FormEvent } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import Modal from './components/Modal/Modal';
 import SubmissionList from './components/SubmissionList/SubmissionList';
-import { basicFormSchema, type BasicFormValues } from './validation/formSchema';
+import { useAppSelector } from './store/hooks';
+import { selectCountries } from './store/selectors';
+import { fileToBase64 } from './utils/fileToBase64';
+import { getPasswordStrength } from './utils/passwordStrength';
+import { createBasicFormSchema, type BasicFormValues } from './validation/formSchema';
 import './App.css';
 
 type FormVariant = 'uncontrolled' | 'react-hook-form';
@@ -11,14 +15,18 @@ type FormVariant = 'uncontrolled' | 'react-hook-form';
 type FormErrors = Partial<Record<keyof BasicFormValues, string>>;
 
 function App() {
+  const countries = useAppSelector(selectCountries);
+  const basicFormSchema = useMemo(() => createBasicFormSchema(countries), [countries]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [variant, setVariant] = useState<FormVariant>('uncontrolled');
   const [uncontrolledErrors, setUncontrolledErrors] = useState<FormErrors>({});
+  const [uncontrolledPassword, setUncontrolledPassword] = useState('');
 
   const {
     register,
     handleSubmit,
     reset: resetHookForm,
+    control,
     formState: { errors: hookFormErrors, isValid },
   } = useForm<BasicFormValues>({
     resolver: zodResolver(basicFormSchema),
@@ -30,12 +38,17 @@ function App() {
       email: '',
       gender: '',
       acceptedTerms: false,
+      password: '',
+      confirmPassword: '',
+      country: '',
     },
   });
+  const hookFormPassword = useWatch({ control, name: 'password', defaultValue: '' });
 
   const openModal = (nextVariant: FormVariant): void => {
     setVariant(nextVariant);
     setUncontrolledErrors({});
+    setUncontrolledPassword('');
     resetHookForm();
     setIsModalOpen(true);
   };
@@ -43,6 +56,7 @@ function App() {
   const closeModal = (): void => {
     setIsModalOpen(false);
     setUncontrolledErrors({});
+    setUncontrolledPassword('');
     resetHookForm();
   };
 
@@ -57,7 +71,7 @@ function App() {
       return result;
     }, {});
 
-  const handleUncontrolledSubmit = (event: FormEvent<HTMLFormElement>): void => {
+  const handleUncontrolledSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const parseResult = basicFormSchema.safeParse({
@@ -66,6 +80,10 @@ function App() {
       email: formData.get('email'),
       gender: formData.get('gender'),
       acceptedTerms: formData.has('acceptedTerms'),
+      password: formData.get('password'),
+      confirmPassword: formData.get('confirmPassword'),
+      country: formData.get('country'),
+      imageFile: formData.get('imageFile'),
     });
 
     if (!parseResult.success) {
@@ -74,9 +92,11 @@ function App() {
     }
 
     setUncontrolledErrors({});
+    await fileToBase64(parseResult.data.imageFile);
   };
 
-  const handleHookFormSubmit = (data: BasicFormValues): void => {
+  const handleHookFormSubmit = async (data: BasicFormValues): Promise<void> => {
+    await fileToBase64(data.imageFile);
     void data;
   };
 
@@ -167,6 +187,69 @@ function App() {
               </p>
             ) : null}
 
+            <div className="app-form__field">
+              <label htmlFor="password-uncontrolled">Password</label>
+              <input
+                id="password-uncontrolled"
+                name="password"
+                type="password"
+                onChange={(event) => setUncontrolledPassword(event.target.value)}
+              />
+              <p className="app-form__hint">
+                Strength: {getPasswordStrength(uncontrolledPassword)}
+              </p>
+              {uncontrolledErrors.password ? (
+                <p className="app-form__error" role="alert">
+                  {uncontrolledErrors.password}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="app-form__field">
+              <label htmlFor="confirm-password-uncontrolled">Confirm password</label>
+              <input
+                id="confirm-password-uncontrolled"
+                name="confirmPassword"
+                type="password"
+              />
+              {uncontrolledErrors.confirmPassword ? (
+                <p className="app-form__error" role="alert">
+                  {uncontrolledErrors.confirmPassword}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="app-form__field">
+              <label htmlFor="country-uncontrolled">Country</label>
+              <input
+                id="country-uncontrolled"
+                name="country"
+                type="text"
+                list="countries-list"
+                autoComplete="off"
+              />
+              <datalist id="countries-list">
+                {countries.map((country) => (
+                  <option key={country} value={country} />
+                ))}
+              </datalist>
+              {uncontrolledErrors.country ? (
+                <p className="app-form__error" role="alert">
+                  {uncontrolledErrors.country}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="app-form__field">
+              <label htmlFor="image-uncontrolled">Image (png/jpeg, max 2 MB)</label>
+              <input id="image-uncontrolled" name="imageFile" type="file" accept="image/png,image/jpeg" />
+              {uncontrolledErrors.imageFile ? (
+                <p className="app-form__error" role="alert">
+                  {uncontrolledErrors.imageFile}
+                </p>
+              ) : null}
+            </div>
+
             <button type="submit">Submit uncontrolled form</button>
           </form>
         ) : (
@@ -242,6 +325,62 @@ function App() {
                 {hookFormErrors.acceptedTerms.message}
               </p>
             ) : null}
+
+            <div className="app-form__field">
+              <label htmlFor="password-hook-form">Password</label>
+              <input id="password-hook-form" type="password" {...register('password')} />
+              <p className="app-form__hint">Strength: {getPasswordStrength(hookFormPassword ?? '')}</p>
+              {hookFormErrors.password ? (
+                <p className="app-form__error" role="alert">
+                  {hookFormErrors.password.message}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="app-form__field">
+              <label htmlFor="confirm-password-hook-form">Confirm password</label>
+              <input
+                id="confirm-password-hook-form"
+                type="password"
+                {...register('confirmPassword')}
+              />
+              {hookFormErrors.confirmPassword ? (
+                <p className="app-form__error" role="alert">
+                  {hookFormErrors.confirmPassword.message}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="app-form__field">
+              <label htmlFor="country-hook-form">Country</label>
+              <input
+                id="country-hook-form"
+                type="text"
+                list="countries-list"
+                autoComplete="off"
+                {...register('country')}
+              />
+              {hookFormErrors.country ? (
+                <p className="app-form__error" role="alert">
+                  {hookFormErrors.country.message}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="app-form__field">
+              <label htmlFor="image-hook-form">Image (png/jpeg, max 2 MB)</label>
+              <input
+                id="image-hook-form"
+                type="file"
+                accept="image/png,image/jpeg"
+                {...register('imageFile')}
+              />
+              {hookFormErrors.imageFile ? (
+                <p className="app-form__error" role="alert">
+                  {hookFormErrors.imageFile.message as string}
+                </p>
+              ) : null}
+            </div>
 
             <button type="submit" disabled={!isValid}>
               Submit React Hook Form

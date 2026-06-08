@@ -35,7 +35,9 @@
 
 .app-form__field input[type='text'],
 .app-form__field input[type='number'],
-.app-form__field input[type='email'] {
+.app-form__field input[type='email'],
+.app-form__field input[type='password'],
+.app-form__field input[type='file'] {
   width: 100%;
   box-sizing: border-box;
   padding: 8px;
@@ -53,5 +55,12 @@
 .app-form__error {
   margin: 0;
   color: #d14343;
+  font-size: 0.875rem;
+}
+
+.app-form__hint {
+  margin: 0;
+  color: var(--text);
+  opacity: 0.85;
   font-size: 0.875rem;
 }

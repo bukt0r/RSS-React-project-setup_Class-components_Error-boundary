@@ -24,6 +24,10 @@ describe('App', () => {
     expect(screen.getByLabelText('Name')).toBeInTheDocument();
     expect(screen.getByLabelText('Age')).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('Password')).toBeInTheDocument();
+    expect(screen.getByLabelText('Confirm password')).toBeInTheDocument();
+    expect(screen.getByLabelText('Country')).toBeInTheDocument();
+    expect(screen.getByLabelText('Image (png/jpeg, max 2 MB)')).toBeInTheDocument();
     expect(screen.getByLabelText('I accept terms and conditions')).toBeInTheDocument();
   });
 
@@ -39,6 +43,10 @@ describe('App', () => {
     expect(screen.getByLabelText('Name')).toBeInTheDocument();
     expect(screen.getByLabelText('Age')).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('Password')).toBeInTheDocument();
+    expect(screen.getByLabelText('Confirm password')).toBeInTheDocument();
+    expect(screen.getByLabelText('Country')).toBeInTheDocument();
+    expect(screen.getByLabelText('Image (png/jpeg, max 2 MB)')).toBeInTheDocument();
     expect(screen.getByLabelText('I accept terms and conditions')).toBeInTheDocument();
   });
 
@@ -53,6 +61,7 @@ describe('App', () => {
 
     expect(screen.getByText('Name is required')).toBeInTheDocument();
     expect(screen.getByText('You must accept terms and conditions')).toBeInTheDocument();
+    expect(screen.getByText('Image is required')).toBeInTheDocument();
   });
 
   it('keeps RHF submit disabled until form is valid', async () => {
@@ -70,6 +79,13 @@ describe('App', () => {
     await user.type(screen.getByLabelText('Email'), 'john@example.com');
     await user.click(screen.getByLabelText('Male'));
     await user.click(screen.getByLabelText('I accept terms and conditions'));
+    await user.type(screen.getByLabelText('Password'), 'Strong123!');
+    await user.type(screen.getByLabelText('Confirm password'), 'Strong123!');
+    await user.type(screen.getByLabelText('Country'), 'Canada');
+    const imageFile = new File(['image-content'], 'avatar.png', {
+      type: 'image/png',
+    });
+    await user.upload(screen.getByLabelText('Image (png/jpeg, max 2 MB)'), imageFile);
 
     expect(submitButton).toBeEnabled();
   });
