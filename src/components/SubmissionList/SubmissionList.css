@@ -1,0 +1,88 @@
+.submission-list {
+  margin-top: 2rem;
+  text-align: left;
+}
+
+.submission-list__title {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  color: var(--text-h);
+}
+
+.submission-list__empty {
+  margin: 0;
+  padding: 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  color: var(--text);
+}
+
+.submission-list__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.submission-list__item {
+  margin: 0;
+}
+
+.submission-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--social-bg);
+}
+
+.submission-card__image {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.submission-card__source {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.submission-card__name {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-h);
+}
+
+.submission-card__meta {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.submission-card--highlighted {
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 2px var(--accent-bg);
+  animation: submission-highlight 3s ease-out;
+}
+
+@keyframes submission-highlight {
+  0%,
+  35% {
+    background: var(--accent-bg);
+  }
+
+  100% {
+    background: var(--social-bg);
+  }
+}
