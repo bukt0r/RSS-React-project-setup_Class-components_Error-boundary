@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Modal from './components/Modal/Modal';
+import SubmissionList from './components/SubmissionList/SubmissionList';
 import './App.css';
 
 function App() {
@@ -20,6 +21,8 @@ function App() {
       >
         <p>Form content will be added here.</p>
       </Modal>
+
+      <SubmissionList />
     </main>
   );
 }
