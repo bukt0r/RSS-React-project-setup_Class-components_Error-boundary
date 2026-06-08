@@ -49,3 +49,9 @@
   grid-template-columns: auto 1fr;
   align-items: center;
 }
+
+.app-form__error {
+  margin: 0;
+  color: #d14343;
+  font-size: 0.875rem;
+}

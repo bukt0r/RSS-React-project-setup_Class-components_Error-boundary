@@ -42,6 +42,38 @@ describe('App', () => {
     expect(screen.getByLabelText('I accept terms and conditions')).toBeInTheDocument();
   });
 
+  it('validates uncontrolled form on submit only', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<App />);
+
+    await user.click(screen.getByRole('button', { name: 'Open uncontrolled form' }));
+    expect(screen.queryByText('Name is required')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Submit uncontrolled form' }));
+
+    expect(screen.getByText('Name is required')).toBeInTheDocument();
+    expect(screen.getByText('You must accept terms and conditions')).toBeInTheDocument();
+  });
+
+  it('keeps RHF submit disabled until form is valid', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<App />);
+
+    await user.click(screen.getByRole('button', { name: 'Open React Hook Form' }));
+
+    const submitButton = screen.getByRole('button', { name: 'Submit React Hook Form' });
+    expect(submitButton).toBeDisabled();
+
+    await user.type(screen.getByLabelText('Name'), 'John');
+    await user.clear(screen.getByLabelText('Age'));
+    await user.type(screen.getByLabelText('Age'), '20');
+    await user.type(screen.getByLabelText('Email'), 'john@example.com');
+    await user.click(screen.getByLabelText('Male'));
+    await user.click(screen.getByLabelText('I accept terms and conditions'));
+
+    expect(submitButton).toBeEnabled();
+  });
+
   it('shows submissions section on the main page', () => {
     renderWithProviders(<App />);
 
