@@ -1,7 +1,6 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/navigation';
 import './AboutPage.css';
 
 const AUTHOR_GITHUB_URL = 'https://github.com/bukt0r';
