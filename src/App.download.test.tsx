@@ -61,10 +61,14 @@ describe('Selected items CSV download', () => {
     await user.click(screen.getByRole('button', { name: 'Download' }));
 
     expect(downloadSelectedItemsCsv).toHaveBeenCalledTimes(1);
-    expect(downloadSelectedItemsCsv).toHaveBeenCalledWith([
-      createSearchResultItem('1', 'Luke Skywalker', 'Jedi'),
-      createSearchResultItem('2', 'Leia Organa', 'Leader'),
-    ]);
+    expect(downloadSelectedItemsCsv).toHaveBeenCalledWith(
+      [
+        createSearchResultItem('1', 'Luke Skywalker', 'Jedi'),
+        createSearchResultItem('2', 'Leia Organa', 'Leader'),
+      ],
+      window.location.origin,
+      'en',
+    );
   });
 
   it('does not call download when no items are selected', async () => {
