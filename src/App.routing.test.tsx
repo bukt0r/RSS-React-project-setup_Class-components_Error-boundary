@@ -1,11 +1,9 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
-import App from './App';
-import { renderWithProviders } from './test-utils/renderWithProviders';
 import { fetchPeoplePage, fetchPersonById } from './services/swapiPeople';
 import { readStoredSearchRaw } from './services/searchStorage';
 import { createSearchResultItem } from './test-utils/createSearchResultItem';
+import { renderAppPage } from './test-utils/renderAppPage';
 
 vi.mock('./services/swapiPeople', () => ({
   fetchPeoplePage: vi.fn(),
@@ -17,14 +15,6 @@ vi.mock('./services/searchStorage', () => ({
   readStoredSearchRaw: vi.fn(),
   writeStoredSearchTrimmed: vi.fn(),
 }));
-
-function renderApp(initialPath = '/') {
-  return renderWithProviders(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <App />
-    </MemoryRouter>,
-  );
-}
 
 describe('App routing', () => {
   beforeEach(() => {
@@ -41,7 +31,7 @@ describe('App routing', () => {
   });
 
   it('renders About page with author and course link', () => {
-    renderApp('/about');
+    renderAppPage('/about');
 
     expect(
       screen.getByRole('heading', { level: 1, name: 'About' }),
@@ -61,7 +51,7 @@ describe('App routing', () => {
   });
 
   it('renders 404 page for unknown routes', () => {
-    renderApp('/unknown-route');
+    renderAppPage('/unknown-route');
 
     expect(
       screen.getByRole('heading', { level: 1, name: '404' }),
@@ -74,7 +64,7 @@ describe('App routing', () => {
 
   it('navigates between Search and About via header links', async () => {
     const user = userEvent.setup();
-    renderApp('/?page=1');
+    renderAppPage('/?page=1');
 
     expect(
       screen.getByRole('heading', { level: 1, name: 'Item Search' }),
@@ -93,7 +83,7 @@ describe('App routing', () => {
 
   it('returns to home from 404 via back link', async () => {
     const user = userEvent.setup();
-    renderApp('/missing-page');
+    renderAppPage('/missing-page');
 
     await user.click(screen.getByRole('link', { name: 'Back to search' }));
     expect(

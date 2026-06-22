@@ -1,10 +1,9 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
-import App from '../App';
-import { renderWithProviders } from '../test-utils/renderWithProviders';
 import { fetchPeoplePage, fetchPersonById } from '../services/swapiPeople';
 import { readStoredSearchRaw } from '../services/searchStorage';
+import { createSearchResultItem } from '../test-utils/createSearchResultItem';
+import { renderAppPage } from '../test-utils/renderAppPage';
 
 vi.mock('../services/swapiPeople', () => ({
   fetchPeoplePage: vi.fn(),
@@ -17,18 +16,8 @@ vi.mock('../services/searchStorage', () => ({
   writeStoredSearchTrimmed: vi.fn(),
 }));
 
-import { createSearchResultItem } from '../test-utils/createSearchResultItem';
-
 const luke = createSearchResultItem('1', 'Luke Skywalker', 'Jedi');
 const leia = createSearchResultItem('2', 'Leia Organa', 'Leader');
-
-function renderApp(initialPath = '/?page=1') {
-  return renderWithProviders(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <App />
-    </MemoryRouter>,
-  );
-}
 
 describe('HomePage item selection', () => {
   beforeEach(() => {
@@ -54,7 +43,7 @@ describe('HomePage item selection', () => {
 
   it('selects and unselects an item via checkbox', async () => {
     const user = userEvent.setup();
-    const { store } = renderApp();
+    const { store } = renderAppPage();
     await waitForResults();
 
     const lukeCheckbox = screen.getByRole('checkbox', {
@@ -72,7 +61,7 @@ describe('HomePage item selection', () => {
 
   it('opens details from card body without changing checkbox selection', async () => {
     const user = userEvent.setup();
-    renderApp();
+    renderAppPage();
     await waitForResults();
 
     const lukeCheckbox = screen.getByRole('checkbox', {
@@ -93,7 +82,7 @@ describe('HomePage item selection', () => {
 
   it('does not open details when only the checkbox is clicked', async () => {
     const user = userEvent.setup();
-    renderApp();
+    renderAppPage();
     await waitForResults();
 
     await user.click(
@@ -109,7 +98,7 @@ describe('HomePage item selection', () => {
 
   it('keeps checkbox selection when details panel is opened', async () => {
     const user = userEvent.setup();
-    renderApp();
+    renderAppPage();
     await waitForResults();
 
     const lukeCheckbox = screen.getByRole('checkbox', {
@@ -127,7 +116,7 @@ describe('HomePage item selection', () => {
 
   it('persists selected items when navigating between Search and About', async () => {
     const user = userEvent.setup();
-    const { store } = renderApp();
+    const { store } = renderAppPage();
     await waitForResults();
 
     await user.click(

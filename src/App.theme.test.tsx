@@ -1,10 +1,8 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
-import App from './App';
-import { renderWithProviders } from './test-utils/renderWithProviders';
 import { fetchPeoplePage } from './services/swapiPeople';
 import { readStoredSearchRaw } from './services/searchStorage';
+import { renderAppPage } from './test-utils/renderAppPage';
 
 vi.mock('./services/swapiPeople', () => ({
   fetchPeoplePage: vi.fn(),
@@ -16,14 +14,6 @@ vi.mock('./services/searchStorage', () => ({
   readStoredSearchRaw: vi.fn(),
   writeStoredSearchTrimmed: vi.fn(),
 }));
-
-function renderApp(initialPath = '/?page=1') {
-  return renderWithProviders(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <App />
-    </MemoryRouter>,
-  );
-}
 
 describe('App theme switching', () => {
   beforeEach(() => {
@@ -39,7 +29,7 @@ describe('App theme switching', () => {
   });
 
   it('shows theme switcher at the top of the app', () => {
-    renderApp();
+    renderAppPage();
 
     expect(screen.getByRole('radio', { name: 'Light' })).toBeInTheDocument();
     expect(screen.getByRole('radio', { name: 'Dark' })).toBeInTheDocument();
@@ -47,7 +37,7 @@ describe('App theme switching', () => {
 
   it('updates document theme across routes', async () => {
     const user = userEvent.setup();
-    renderApp();
+    renderAppPage();
 
     await user.click(screen.getByRole('radio', { name: 'Dark' }));
     expect(document.documentElement).toHaveAttribute('data-theme', 'dark');

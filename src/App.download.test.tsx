@@ -1,12 +1,10 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
-import App from './App';
-import { renderWithProviders } from './test-utils/renderWithProviders';
 import { downloadSelectedItemsCsv } from './services/selectedItemsCsv';
 import { fetchPeoplePage } from './services/swapiPeople';
 import { readStoredSearchRaw } from './services/searchStorage';
 import { createSearchResultItem } from './test-utils/createSearchResultItem';
+import { renderAppPage } from './test-utils/renderAppPage';
 
 vi.mock('./services/swapiPeople', () => ({
   fetchPeoplePage: vi.fn(),
@@ -30,14 +28,6 @@ vi.mock('./services/selectedItemsCsv', async () => {
   };
 });
 
-function renderApp(initialPath = '/?page=1') {
-  return renderWithProviders(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <App />
-    </MemoryRouter>,
-  );
-}
-
 describe('Selected items CSV download', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -54,7 +44,7 @@ describe('Selected items CSV download', () => {
 
   it('downloads selected items when Download is clicked', async () => {
     const user = userEvent.setup();
-    renderApp();
+    renderAppPage();
 
     await waitFor(() => {
       expect(
@@ -78,7 +68,7 @@ describe('Selected items CSV download', () => {
   });
 
   it('does not call download when no items are selected', async () => {
-    renderApp();
+    renderAppPage();
 
     await waitFor(() => {
       expect(

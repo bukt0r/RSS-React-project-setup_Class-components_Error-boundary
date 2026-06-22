@@ -1,5 +1,7 @@
+'use client';
+
 import { useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useAppSearchParams } from '../hooks/useAppSearchParams';
 import { swapiApi, useGetPersonByIdQuery } from '../api/swapiApi';
 import ErrorBanner from '../components/ErrorBanner';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -8,7 +10,7 @@ import './PersonDetailsPanel.css';
 
 function PersonDetailsPanel() {
   const dispatch = useAppDispatch();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setSearchParams } = useAppSearchParams();
   const detailsId = searchParams.get('details');
   const { data: person, isFetching, isError, error } = useGetPersonByIdQuery(
     detailsId ?? '',
@@ -25,14 +27,11 @@ function PersonDetailsPanel() {
   const isLoading = isFetching;
 
   const closeDetails = (): void => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        next.delete('details');
-        return next;
-      },
-      { replace: true },
-    );
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete('details');
+      return next;
+    });
   };
 
   const handleRefreshDetails = (): void => {

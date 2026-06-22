@@ -1,10 +1,13 @@
+'use client';
+
 import {
   useCallback,
   useEffect,
   useState,
   type ChangeEvent,
 } from 'react';
-import { Outlet, useSearchParams } from 'react-router-dom';
+import PersonDetailsPanel from './PersonDetailsPanel';
+import { useAppSearchParams } from '../hooks/useAppSearchParams';
 import { swapiApi, useGetPeoplePageQuery } from '../api/swapiApi';
 import CardList from '../components/CardList';
 import ErrorBanner from '../components/ErrorBanner';
@@ -31,7 +34,7 @@ function HomePage() {
   const dispatch = useAppDispatch();
   const selectedItemsById = useAppSelector(selectSelectedItemsById);
   const { readStoredSearch, saveTrimmedSearch } = useSearchStorage();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setSearchParams } = useAppSearchParams();
 
   const [searchInput, setSearchInput] = useState(
     () => readStoredSearch() ?? '',
@@ -67,41 +70,32 @@ function HomePage() {
   const hasLoadedOnce = isSuccess || isError;
 
   const closeDetails = useCallback((): void => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        next.delete('details');
-        return next;
-      },
-      { replace: true },
-    );
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete('details');
+      return next;
+    });
   }, [setSearchParams]);
 
   const openDetails = useCallback(
     (id: string): void => {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          next.set('details', id);
-          return next;
-        },
-        { replace: true },
-      );
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('details', id);
+        return next;
+      });
     },
     [setSearchParams],
   );
 
   const updatePageInUrl = useCallback(
     (page: number) => {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
-          next.set('page', String(page));
-          next.delete('details');
-          return next;
-        },
-        { replace: true },
-      );
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('page', String(page));
+        next.delete('details');
+        return next;
+      });
     },
     [setSearchParams],
   );
@@ -263,7 +257,7 @@ function HomePage() {
       </div>
 
       <aside className="home-split__details">
-        <Outlet />
+        <PersonDetailsPanel />
       </aside>
     </main>
   );

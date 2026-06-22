@@ -1,12 +1,9 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import HomePage from './HomePage';
-import PersonDetailsPanel from './PersonDetailsPanel';
 import { useSearchStorage } from '../hooks/useSearchStorage';
 import { fetchPeoplePage, fetchPersonById } from '../services/swapiPeople';
 import { createSearchResultItem } from '../test-utils/createSearchResultItem';
-import { renderWithProviders } from '../test-utils/renderWithProviders';
+import { renderHomePage } from '../test-utils/renderAppPage';
 
 vi.mock('../services/swapiPeople', () => ({
   fetchPeoplePage: vi.fn(),
@@ -17,18 +14,6 @@ vi.mock('../services/swapiPeople', () => ({
 vi.mock('../hooks/useSearchStorage', () => ({
   useSearchStorage: vi.fn(),
 }));
-
-function renderHomePage(initialPath = '/?page=1') {
-  return renderWithProviders(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <Routes>
-        <Route path="/" element={<HomePage />}>
-          <Route index element={<PersonDetailsPanel />} />
-        </Route>
-      </Routes>
-    </MemoryRouter>,
-  );
-}
 
 describe('HomePage RTK Query behavior', () => {
   beforeEach(() => {

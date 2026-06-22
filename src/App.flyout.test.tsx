@@ -1,11 +1,9 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
-import App from './App';
-import { renderWithProviders } from './test-utils/renderWithProviders';
 import { fetchPeoplePage } from './services/swapiPeople';
 import { readStoredSearchRaw } from './services/searchStorage';
 import { createSearchResultItem } from './test-utils/createSearchResultItem';
+import { renderAppPage } from './test-utils/renderAppPage';
 
 vi.mock('./services/swapiPeople', () => ({
   fetchPeoplePage: vi.fn(),
@@ -17,14 +15,6 @@ vi.mock('./services/searchStorage', () => ({
   readStoredSearchRaw: vi.fn(),
   writeStoredSearchTrimmed: vi.fn(),
 }));
-
-function renderApp(initialPath = '/?page=1') {
-  return renderWithProviders(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <App />
-    </MemoryRouter>,
-  );
-}
 
 async function waitForSearchResults(): Promise<void> {
   await waitFor(() => {
@@ -49,7 +39,7 @@ describe('Selection flyout', () => {
   });
 
   it('is hidden when no items are selected', async () => {
-    renderApp();
+    renderAppPage();
     await waitForSearchResults();
 
     expect(
@@ -59,7 +49,7 @@ describe('Selection flyout', () => {
 
   it('shows the number of selected items', async () => {
     const user = userEvent.setup();
-    renderApp();
+    renderAppPage();
     await waitForSearchResults();
 
     await user.click(
@@ -75,7 +65,7 @@ describe('Selection flyout', () => {
 
   it('clears all selections when Unselect all is clicked', async () => {
     const user = userEvent.setup();
-    const { store } = renderApp();
+    const { store } = renderAppPage();
     await waitForSearchResults();
 
     await user.click(
@@ -101,7 +91,7 @@ describe('Selection flyout', () => {
 
   it('stays visible on About page while selections persist', async () => {
     const user = userEvent.setup();
-    renderApp();
+    renderAppPage();
     await waitForSearchResults();
 
     await user.click(

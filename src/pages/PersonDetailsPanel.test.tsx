@@ -1,25 +1,13 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import PersonDetailsPanel from './PersonDetailsPanel';
 import { fetchPersonById } from '../services/swapiPeople';
 import { createSearchResultItem } from '../test-utils/createSearchResultItem';
-import { renderWithProviders } from '../test-utils/renderWithProviders';
+import { renderPersonDetailsPanel } from '../test-utils/renderAppPage';
 
 vi.mock('../services/swapiPeople', () => ({
   fetchPersonById: vi.fn(),
   SwapiHttpError: class SwapiHttpError extends Error {},
 }));
-
-function renderPanel(initialPath = '/?page=1&details=1') {
-  return renderWithProviders(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <Routes>
-        <Route path="/" element={<PersonDetailsPanel />} />
-      </Routes>
-    </MemoryRouter>,
-  );
-}
 
 describe('PersonDetailsPanel', () => {
   beforeEach(() => {
@@ -27,7 +15,7 @@ describe('PersonDetailsPanel', () => {
   });
 
   it('renders nothing when details param is missing', () => {
-    const { container } = renderPanel('/?page=1');
+    const { container } = renderPersonDetailsPanel('/?page=1');
 
     expect(container).toBeEmptyDOMElement();
   });
@@ -37,7 +25,7 @@ describe('PersonDetailsPanel', () => {
       createSearchResultItem('1', 'Luke Skywalker', 'Jedi master'),
     );
 
-    renderPanel();
+    renderPersonDetailsPanel();
 
     await waitFor(() => {
       expect(fetchPersonById).toHaveBeenCalledWith('1');
@@ -56,7 +44,7 @@ describe('PersonDetailsPanel', () => {
       createSearchResultItem('1', 'Luke Skywalker', 'Jedi master'),
     );
 
-    renderPanel();
+    renderPersonDetailsPanel();
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Close details' })).toBeEnabled();
@@ -78,7 +66,7 @@ describe('PersonDetailsPanel', () => {
         }),
     );
 
-    renderPanel();
+    renderPersonDetailsPanel();
 
     expect(screen.getByText('Loading details')).toBeInTheDocument();
 
@@ -94,7 +82,7 @@ describe('PersonDetailsPanel', () => {
       new Error('Unable to load details. Please try again.'),
     );
 
-    renderPanel();
+    renderPersonDetailsPanel();
 
     await waitFor(() => {
       expect(
@@ -113,7 +101,7 @@ describe('PersonDetailsPanel', () => {
         createSearchResultItem('1', 'Luke Skywalker', 'Updated master'),
       );
 
-    renderPanel();
+    renderPersonDetailsPanel();
 
     await waitFor(() => {
       expect(screen.getByText('Jedi master')).toBeInTheDocument();

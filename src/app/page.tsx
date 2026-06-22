@@ -1,9 +1,10 @@
-import MigrationStatus from '@/components/MigrationStatus';
+import { Suspense } from 'react';
+import HomePage from '@/pages/HomePage';
 
-export default function HomePage() {
+export default function HomeRoute() {
   return (
-    <main>
-      <MigrationStatus />
-    </main>
+    <Suspense fallback={null}>
+      <HomePage />
+    </Suspense>
   );
 }

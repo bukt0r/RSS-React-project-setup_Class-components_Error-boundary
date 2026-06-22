@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import './NotFoundPage.css';
 
 function NotFoundPage() {
@@ -6,7 +6,7 @@ function NotFoundPage() {
     <main className="not-found-page">
       <h1>404</h1>
       <p className="not-found-page__message">Page not found.</p>
-      <Link className="not-found-page__link" to="/">
+      <Link className="not-found-page__link" href="/">
         Back to search
       </Link>
     </main>
