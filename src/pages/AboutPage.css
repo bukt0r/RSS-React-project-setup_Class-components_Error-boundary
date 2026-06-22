@@ -5,6 +5,11 @@
   text-align: left;
 }
 
+.about-page__logo {
+  display: block;
+  margin-bottom: 16px;
+}
+
 .about-page h1 {
   margin: 0 0 16px;
   color: var(--text-h);

@@ -251,6 +251,18 @@
   text-align: left;
   font: inherit;
   cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.result-card__text {
+  min-width: 0;
+  flex: 1;
+}
+
+.result-card__image {
+  border-radius: 8px;
 }
 
 .result-card__body:hover .result-card__name {

@@ -59,6 +59,7 @@
   },
   "about": {
     "title": "О проекте",
+    "logoAlt": "Логотип Item Search",
     "text": "Item Search — учебный проект курса React Rolling Scopes School.",
     "author": "Автор:",
     "courseLink": "Курс React RS School"

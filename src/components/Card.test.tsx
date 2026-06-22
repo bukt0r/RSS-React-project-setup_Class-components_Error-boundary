@@ -22,6 +22,10 @@ describe('Card', () => {
       screen.getByRole('heading', { level: 3, name: 'Leia' }),
     ).toBeInTheDocument();
     expect(screen.getByText('Princess')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Leia' })).toHaveAttribute(
+      'src',
+      'https://starwars-visualguide.com/assets/img/character/5.jpg',
+    );
   });
 
   it('calls onOpenDetails when card body is clicked', async () => {

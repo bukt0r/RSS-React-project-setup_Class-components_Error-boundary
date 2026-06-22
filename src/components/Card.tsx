@@ -2,6 +2,7 @@
 
 import type { ChangeEvent, MouseEvent } from 'react';
 import { useTranslations } from 'next-intl';
+import PersonImage from './PersonImage';
 import type { SearchResultItem } from '../types/item';
 
 interface CardProps {
@@ -63,8 +64,16 @@ function Card({
         className="result-card__body"
         onClick={handleBodyClick}
       >
-        <h3 className="result-card__name">{item.name}</h3>
-        <p className="result-card__description">{item.description}</p>
+        <PersonImage
+          src={item.imageUrl}
+          alt={item.name || t('selectItem')}
+          size={56}
+          className="result-card__image"
+        />
+        <span className="result-card__text">
+          <h3 className="result-card__name">{item.name}</h3>
+          <p className="result-card__description">{item.description}</p>
+        </span>
       </button>
     </article>
   );

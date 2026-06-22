@@ -62,6 +62,10 @@
   margin: 0;
 }
 
+.person-details__image {
+  margin-bottom: 12px;
+}
+
 .person-details__name {
   margin: 0 0 12px;
   font-size: 1.25rem;

@@ -6,6 +6,7 @@ import { useAppSearchParams } from '../hooks/useAppSearchParams';
 import { swapiApi, useGetPersonByIdQuery } from '../api/swapiApi';
 import ErrorBanner from '../components/ErrorBanner';
 import LoadingSpinner from '../components/LoadingSpinner';
+import PersonImage from '../components/PersonImage';
 import { useAppDispatch } from '../store/hooks';
 import './PersonDetailsPanel.css';
 
@@ -82,6 +83,13 @@ function PersonDetailsPanel() {
 
       {!isLoading && person ? (
         <article className="person-details__content">
+          <PersonImage
+            src={person.imageUrl}
+            alt={person.name}
+            size={96}
+            className="person-details__image"
+            priority
+          />
           <h3 className="person-details__name">{person.name}</h3>
           <p className="person-details__description">{person.description}</p>
         </article>

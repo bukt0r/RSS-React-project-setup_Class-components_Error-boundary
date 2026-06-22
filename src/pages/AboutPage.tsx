@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import './AboutPage.css';
 
@@ -11,6 +12,14 @@ function AboutPage() {
 
   return (
     <main className="about-page">
+      <Image
+        src="/images/rs-search-logo.svg"
+        alt={t('logoAlt')}
+        width={64}
+        height={64}
+        className="about-page__logo"
+        priority
+      />
       <h1>{t('title')}</h1>
       <p className="about-page__text">{t('text')}</p>
       <p className="about-page__author">

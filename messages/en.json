@@ -59,6 +59,7 @@
   },
   "about": {
     "title": "About",
+    "logoAlt": "Item Search logo",
     "text": "Item Search is a training project for the Rolling Scopes School React course.",
     "author": "Author:",
     "courseLink": "RS School React course"
