@@ -13,6 +13,11 @@
   flex-shrink: 0;
 }
 
+.app-shell__content {
+  flex: 1;
+  min-height: 0;
+}
+
 .app-header {
   display: flex;
   flex-wrap: wrap;
