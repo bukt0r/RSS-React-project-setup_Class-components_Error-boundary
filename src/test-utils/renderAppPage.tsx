@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/i18n/navigation';
 import AppShell from '../components/AppShell';
 import AboutPage from '../pages/AboutPage';
 import HomePage from '../pages/HomePage';

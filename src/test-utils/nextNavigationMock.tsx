@@ -8,6 +8,16 @@ const navigationState = vi.hoisted(() => ({
   version: 0,
 }));
 
+function stripLocalePrefix(pathname: string): string {
+  const match = pathname.match(/^\/(en|ru)(\/.*)?$/);
+
+  if (!match) {
+    return pathname || '/';
+  }
+
+  return match[2] || '/';
+}
+
 function notifyNavigation(): void {
   navigationState.version += 1;
   navigationState.listeners.forEach((listener) => listener());
@@ -36,7 +46,7 @@ export function resetNavigation(): void {
 
 export function setNextNavigation(path: string): void {
   const url = new URL(path, 'http://localhost');
-  navigationState.pathname = url.pathname;
+  navigationState.pathname = stripLocalePrefix(url.pathname);
   navigationState.searchParams = new URLSearchParams(url.search);
   notifyNavigation();
 }
@@ -49,22 +59,52 @@ function navigate(href: string): void {
   }
 
   const url = new URL(href, 'http://localhost');
-  navigationState.pathname = url.pathname;
+  navigationState.pathname = stripLocalePrefix(url.pathname);
   navigationState.searchParams = new URLSearchParams(url.search);
   notifyNavigation();
 }
 
+const router = {
+  replace: navigate,
+  push: navigate,
+  refresh: vi.fn(),
+  back: vi.fn(),
+  forward: vi.fn(),
+  prefetch: vi.fn(),
+};
+
 vi.mock('next/navigation', () => ({
-  usePathname: () => navigationState.pathname,
   useSearchParams: () => navigationState.searchParams,
-  useRouter: () => ({
-    replace: navigate,
-    push: navigate,
-    refresh: vi.fn(),
-    back: vi.fn(),
-    forward: vi.fn(),
-    prefetch: vi.fn(),
-  }),
+}));
+
+vi.mock('@/i18n/navigation', () => ({
+  usePathname: () => navigationState.pathname,
+  useRouter: () => router,
+  Link: ({
+    href,
+    children,
+    className,
+    ...props
+  }: {
+    href: string;
+    children: ReactNode;
+    className?: string;
+  }) =>
+    createElement(
+      'a',
+      {
+        href: typeof href === 'string' ? href : String(href),
+        className,
+        onClick: (event: MouseEvent<HTMLAnchorElement>) => {
+          event.preventDefault();
+          navigate(typeof href === 'string' ? href : String(href));
+        },
+        ...props,
+      },
+      children,
+    ),
+  redirect: vi.fn(),
+  getPathname: vi.fn(),
 }));
 
 vi.mock('next/link', () => ({

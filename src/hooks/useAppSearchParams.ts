@@ -1,6 +1,7 @@
 'use client';
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from '@/i18n/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
 
 type SearchParamsUpdater = (prev: URLSearchParams) => URLSearchParams;
@@ -16,8 +17,7 @@ export function useAppSearchParams() {
     (updater: SearchParamsUpdater): void => {
       const next = updater(new URLSearchParams(searchParams.toString()));
       const query = next.toString();
-      const currentPath = pathname ?? '/';
-      router.replace(query ? `${currentPath}?${query}` : currentPath);
+      router.replace(query ? `${pathname}?${query}` : pathname);
     },
     [pathname, router, searchParams],
   );
