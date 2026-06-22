@@ -2,14 +2,13 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { searchPeopleAction } from '@/actions/searchPeople';
 import { useHomeSearch } from '@/components/search/HomeSearchContext';
 import CardList from '@/components/CardList';
 import ErrorBanner from '@/components/ErrorBanner';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
 import type { PeoplePageResult } from '@/services/swapiPeople';
-import type { LoadedPeoplePage } from '@/server/loadPeoplePage';
+import { loadPeoplePage, type LoadedPeoplePage } from '@/server/loadPeoplePage';
 
 interface SearchResultsInteractiveProps {
   initialPage: number;
@@ -44,6 +43,7 @@ function SearchResultsInteractive({
 
   const shouldUseServerSnapshot =
     initialData !== null &&
+    initialFetchError === null &&
     committedSearch === initialSearch &&
     currentPage === initialPage;
 
@@ -62,7 +62,7 @@ function SearchResultsInteractive({
 
   const loadResults = useCallback(
     async (search: string, page: number): Promise<void> => {
-      const result = await searchPeopleAction(search, page);
+      const result = await loadPeoplePage(search, page);
       setClientResults(result);
       setLoadedQueryKey(`${search}::${page}`);
     },
@@ -85,7 +85,7 @@ function SearchResultsInteractive({
 
     let cancelled = false;
 
-    void searchPeopleAction(committedSearch, currentPage).then((result) => {
+    void loadPeoplePage(committedSearch, currentPage).then((result) => {
       if (!cancelled) {
         setClientResults(result);
         setLoadedQueryKey(queryKey);

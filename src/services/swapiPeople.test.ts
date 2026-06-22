@@ -154,25 +154,6 @@ describe('swapiPeople service', () => {
 
   it('uses SWAPI_BASE_URL when provided', async () => {
     vi.stubEnv('SWAPI_BASE_URL', 'https://swapi.dev/api');
-    vi.stubEnv('VERCEL', '');
-
-    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => ({ count: 0, results: [] }),
-    } as Response);
-
-    await fetchPeoplePage('Luke', 1);
-
-    expect(fetchMock).toHaveBeenCalledWith(
-      'https://swapi.dev/api/people/?search=Luke',
-      swapiFetchOptions,
-    );
-  });
-
-  it('uses swapi.dev on Vercel when SWAPI_BASE_URL is not set', async () => {
-    vi.stubEnv('SWAPI_BASE_URL', '');
-    vi.stubEnv('VERCEL', '1');
 
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
       ok: true,

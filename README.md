@@ -18,9 +18,7 @@ Migration of the SWAPI search application from Vite + React Router to **Next.js 
 - Production: https://rss-react-seven.vercel.app/?page=1
 - Platform: Vercel
 
-Search requests are loaded on the server (SSR and Server Actions). On Vercel the app automatically uses `https://swapi.dev/api`, because `swapi.py4e.com` often returns **403** from serverless IPs. Local development keeps the default `https://swapi.py4e.com/api`.
-
-Optional override (available on the free Hobby plan too): Project → Settings → Environment Variables → add `SWAPI_BASE_URL`.
+Search requests are server-rendered on first load (SSR) and then loaded in the browser for pagination and new searches. This avoids Vercel serverless blocks from `swapi.py4e.com` while keeping SSR for local development.
 
 ## Author
 

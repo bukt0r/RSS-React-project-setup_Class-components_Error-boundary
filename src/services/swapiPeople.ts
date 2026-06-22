@@ -2,7 +2,6 @@ import type { SearchResultItem } from '../types/item';
 import { getPersonImageUrl } from './personImageUrl';
 
 const DEFAULT_SWAPI_BASE_URL = 'https://swapi.py4e.com/api';
-const VERCEL_SWAPI_BASE_URL = 'https://swapi.dev/api';
 const SWAPI_PAGE_SIZE = 10;
 
 const SWAPI_FETCH_OPTIONS: RequestInit = {
@@ -18,10 +17,6 @@ function getSwapiBaseUrl(): string {
 
   if (configured) {
     return configured.replace(/\/$/, '');
-  }
-
-  if (process.env.VERCEL) {
-    return VERCEL_SWAPI_BASE_URL;
   }
 
   return DEFAULT_SWAPI_BASE_URL;

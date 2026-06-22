@@ -8,12 +8,11 @@ import {
 } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
-import { loadPersonDetailsAction } from '@/actions/loadPersonDetails';
 import { useAppSearchParams } from '@/hooks/useAppSearchParams';
 import ErrorBanner from '@/components/ErrorBanner';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import PersonDetailsView from '@/components/details/PersonDetailsView';
-import type { LoadedPersonDetails } from '@/server/loadPersonById';
+import { loadPersonById, type LoadedPersonDetails } from '@/server/loadPersonById';
 import type { SearchResultItem } from '@/types/item';
 import '@/views/PersonDetailsPanel.css';
 
@@ -31,8 +30,7 @@ function PersonDetailsInteractive({
   const t = useTranslations('details');
   const router = useRouter();
   const { setSearchParams } = useAppSearchParams();
-  const shouldUseServerSnapshot =
-    initialPerson !== null || initialFetchError !== null;
+  const shouldUseServerSnapshot = initialPerson !== null;
   const [clientState, setClientState] = useState<LoadedPersonDetails | null>(null);
   const [isClientLoading, setIsClientLoading] = useState(!shouldUseServerSnapshot);
   const [isRefreshing, startTransition] = useTransition();
@@ -43,7 +41,7 @@ function PersonDetailsInteractive({
 
   const loadDetails = useCallback(async (personId: string): Promise<void> => {
     setIsClientLoading(true);
-    const result = await loadPersonDetailsAction(personId);
+    const result = await loadPersonById(personId);
     setClientState(result);
     setIsClientLoading(false);
   }, []);
@@ -55,7 +53,7 @@ function PersonDetailsInteractive({
 
     let cancelled = false;
 
-    void loadPersonDetailsAction(detailsId).then((result) => {
+    void loadPersonById(detailsId).then((result) => {
       if (!cancelled) {
         setClientState(result);
         setIsClientLoading(false);
