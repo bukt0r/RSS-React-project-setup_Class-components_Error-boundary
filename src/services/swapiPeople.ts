@@ -2,6 +2,7 @@ import type { SearchResultItem } from '../types/item';
 import { getPersonImageUrl } from './personImageUrl';
 
 const DEFAULT_SWAPI_BASE_URL = 'https://swapi.py4e.com/api';
+const VERCEL_SWAPI_BASE_URL = 'https://swapi.dev/api';
 const SWAPI_PAGE_SIZE = 10;
 
 const SWAPI_FETCH_OPTIONS: RequestInit = {
@@ -13,10 +14,17 @@ const SWAPI_FETCH_OPTIONS: RequestInit = {
 };
 
 function getSwapiBaseUrl(): string {
-  return (process.env.SWAPI_BASE_URL ?? DEFAULT_SWAPI_BASE_URL).replace(
-    /\/$/,
-    '',
-  );
+  const configured = process.env.SWAPI_BASE_URL?.trim();
+
+  if (configured) {
+    return configured.replace(/\/$/, '');
+  }
+
+  if (process.env.VERCEL) {
+    return VERCEL_SWAPI_BASE_URL;
+  }
+
+  return DEFAULT_SWAPI_BASE_URL;
 }
 
 function getSwapiPeopleUrl(): string {
