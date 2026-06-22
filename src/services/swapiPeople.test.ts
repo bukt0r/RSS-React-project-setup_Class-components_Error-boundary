@@ -15,6 +15,13 @@ const lukePerson = {
   hair_color: 'blond',
 };
 
+const swapiFetchOptions = expect.objectContaining({
+  cache: 'no-store',
+  headers: expect.objectContaining({
+    Accept: 'application/json',
+  }),
+});
+
 describe('swapiPeople service', () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -29,7 +36,10 @@ describe('swapiPeople service', () => {
 
     await fetchPeoplePage('   ', 1);
 
-    expect(fetchMock).toHaveBeenCalledWith('https://swapi.py4e.com/api/people/');
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://swapi.py4e.com/api/people/',
+      swapiFetchOptions,
+    );
   });
 
   it('requests encoded search query and maps response data', async () => {
@@ -46,6 +56,7 @@ describe('swapiPeople service', () => {
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
       'https://swapi.py4e.com/api/people/?search=Luke',
+      swapiFetchOptions,
     );
     expect(result).toEqual({
       items: [
@@ -74,6 +85,7 @@ describe('swapiPeople service', () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       'https://swapi.py4e.com/api/people/?page=2',
+      swapiFetchOptions,
     );
   });
 
@@ -110,6 +122,7 @@ describe('swapiPeople service', () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       'https://swapi.py4e.com/api/people/1/',
+      swapiFetchOptions,
     );
     expect(result.id).toBe('1');
     expect(result.name).toBe('Luke Skywalker');
@@ -137,5 +150,22 @@ describe('swapiPeople service', () => {
         imageUrl: 'https://starwars-visualguide.com/assets/img/character/1.jpg',
       },
     ]);
+  });
+
+  it('uses SWAPI_BASE_URL when provided', async () => {
+    vi.stubEnv('SWAPI_BASE_URL', 'https://swapi.dev/api');
+
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ count: 0, results: [] }),
+    } as Response);
+
+    await fetchPeoplePage('Luke', 1);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://swapi.dev/api/people/?search=Luke',
+      swapiFetchOptions,
+    );
   });
 });

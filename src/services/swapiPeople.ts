@@ -1,8 +1,31 @@
 import type { SearchResultItem } from '../types/item';
 import { getPersonImageUrl } from './personImageUrl';
 
-const SWAPI_PEOPLE_URL = 'https://swapi.py4e.com/api/people/';
+const DEFAULT_SWAPI_BASE_URL = 'https://swapi.py4e.com/api';
 const SWAPI_PAGE_SIZE = 10;
+
+const SWAPI_FETCH_OPTIONS: RequestInit = {
+  headers: {
+    Accept: 'application/json',
+    'User-Agent': 'rs-react-app/1.0',
+  },
+  cache: 'no-store',
+};
+
+function getSwapiBaseUrl(): string {
+  return (process.env.SWAPI_BASE_URL ?? DEFAULT_SWAPI_BASE_URL).replace(
+    /\/$/,
+    '',
+  );
+}
+
+function getSwapiPeopleUrl(): string {
+  return `${getSwapiBaseUrl()}/people/`;
+}
+
+async function fetchSwapi(url: string): Promise<Response> {
+  return fetch(url, SWAPI_FETCH_OPTIONS);
+}
 
 export class SwapiHttpError extends Error {
   readonly status: number;
@@ -88,7 +111,8 @@ function buildPeopleUrl(searchFromInput: string, page: number): string {
   }
 
   const query = params.toString();
-  return query.length > 0 ? `${SWAPI_PEOPLE_URL}?${query}` : SWAPI_PEOPLE_URL;
+  const peopleUrl = getSwapiPeopleUrl();
+  return query.length > 0 ? `${peopleUrl}?${query}` : peopleUrl;
 }
 
 export async function fetchPeoplePage(
@@ -97,7 +121,7 @@ export async function fetchPeoplePage(
 ): Promise<PeoplePageResult> {
   const safePage = Math.max(1, Math.floor(page));
   const url = buildPeopleUrl(searchFromInput, safePage);
-  const response = await fetch(url);
+  const response = await fetchSwapi(url);
 
   if (!response.ok) {
     throw new SwapiHttpError(
@@ -119,7 +143,7 @@ export async function fetchPeoplePage(
 }
 
 export async function fetchPersonById(id: string): Promise<SearchResultItem> {
-  const response = await fetch(`${SWAPI_PEOPLE_URL}${id}/`);
+  const response = await fetchSwapi(`${getSwapiPeopleUrl()}${id}/`);
 
   if (!response.ok) {
     throw new SwapiHttpError(
