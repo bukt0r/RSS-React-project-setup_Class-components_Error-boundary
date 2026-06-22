@@ -1,6 +1,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { downloadSelectedItemsCsv } from './services/selectedItemsCsv';
+import { exportSelectedItemsCsv } from './actions/exportSelectedItemsCsv';
+import { downloadCsvFile } from './lib/downloadCsvFile';
 import { fetchPeoplePage } from './services/swapiPeople';
 import { readStoredSearchRaw } from './services/searchStorage';
 import { createSearchResultItem } from './test-utils/createSearchResultItem';
@@ -17,16 +18,13 @@ vi.mock('./services/searchStorage', () => ({
   writeStoredSearchTrimmed: vi.fn(),
 }));
 
-vi.mock('./services/selectedItemsCsv', async () => {
-  const actual = await vi.importActual<typeof import('./services/selectedItemsCsv')>(
-    './services/selectedItemsCsv',
-  );
+vi.mock('./actions/exportSelectedItemsCsv', () => ({
+  exportSelectedItemsCsv: vi.fn(),
+}));
 
-  return {
-    ...actual,
-    downloadSelectedItemsCsv: vi.fn(),
-  };
-});
+vi.mock('./lib/downloadCsvFile', () => ({
+  downloadCsvFile: vi.fn(),
+}));
 
 describe('Selected items CSV download', () => {
   beforeEach(() => {
@@ -39,6 +37,10 @@ describe('Selected items CSV download', () => {
       ],
       currentPage: 1,
       totalPages: 1,
+    });
+    vi.mocked(exportSelectedItemsCsv).mockResolvedValue({
+      content: 'id,name\n1,Luke Skywalker',
+      filename: '2_items.csv',
     });
   });
 
@@ -60,8 +62,11 @@ describe('Selected items CSV download', () => {
     );
     await user.click(screen.getByRole('button', { name: 'Download' }));
 
-    expect(downloadSelectedItemsCsv).toHaveBeenCalledTimes(1);
-    expect(downloadSelectedItemsCsv).toHaveBeenCalledWith(
+    await waitFor(() => {
+      expect(exportSelectedItemsCsv).toHaveBeenCalledTimes(1);
+    });
+
+    expect(exportSelectedItemsCsv).toHaveBeenCalledWith(
       [
         createSearchResultItem('1', 'Luke Skywalker', 'Jedi'),
         createSearchResultItem('2', 'Leia Organa', 'Leader'),
@@ -69,9 +74,10 @@ describe('Selected items CSV download', () => {
       window.location.origin,
       'en',
     );
+    expect(downloadCsvFile).toHaveBeenCalledWith('id,name\n1,Luke Skywalker', '2_items.csv');
   });
 
-  it('does not call download when no items are selected', async () => {
+  it('does not call server export when no items are selected', async () => {
     renderAppPage();
 
     await waitFor(() => {
@@ -80,7 +86,8 @@ describe('Selected items CSV download', () => {
       ).toBeInTheDocument();
     });
 
-    expect(downloadSelectedItemsCsv).not.toHaveBeenCalled();
+    expect(exportSelectedItemsCsv).not.toHaveBeenCalled();
+    expect(downloadCsvFile).not.toHaveBeenCalled();
     expect(
       screen.queryByRole('button', { name: 'Download' }),
     ).not.toBeInTheDocument();

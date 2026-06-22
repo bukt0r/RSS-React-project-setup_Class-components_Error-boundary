@@ -2,10 +2,11 @@
 
 import { useLocale } from 'next-intl';
 import { useCallback, type ReactNode } from 'react';
+import { exportSelectedItemsCsv } from '@/actions/exportSelectedItemsCsv';
 import AppHeader from '@/components/layout/AppHeader';
 import SelectionFlyout from '@/components/SelectionFlyout';
 import type { AppLocale } from '@/i18n/routing';
-import { downloadSelectedItemsCsv } from '@/services/selectedItemsCsv';
+import { downloadCsvFile } from '@/lib/downloadCsvFile';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   selectSelectedItems,
@@ -27,8 +28,16 @@ function SharedLayout({ children }: SharedLayoutProps) {
     dispatch(clearSelectedItems());
   }, [dispatch]);
 
-  const handleDownload = useCallback((): void => {
-    downloadSelectedItemsCsv(selectedItems, window.location.origin, locale);
+  const handleDownload = useCallback(async (): Promise<void> => {
+    const exportResult = await exportSelectedItemsCsv(
+      selectedItems,
+      window.location.origin,
+      locale,
+    );
+
+    if (exportResult) {
+      downloadCsvFile(exportResult.content, exportResult.filename);
+    }
   }, [locale, selectedItems]);
 
   return (
