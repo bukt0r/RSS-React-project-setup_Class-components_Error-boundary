@@ -16,7 +16,7 @@ vi.mock('./services/searchStorage', () => ({
   writeStoredSearchTrimmed: vi.fn(),
 }));
 
-describe('App routing', () => {
+describe('App not-found handling', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(readStoredSearchRaw).mockReturnValue(null);
@@ -30,27 +30,7 @@ describe('App routing', () => {
     );
   });
 
-  it('renders About page with author and course link', () => {
-    renderAppPage('/about');
-
-    expect(
-      screen.getByRole('heading', { level: 1, name: 'About' }),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/Author:/)).toBeInTheDocument();
-
-    const authorLink = screen.getByRole('link', { name: 'vufimcev' });
-    expect(authorLink).toHaveAttribute('href', 'https://github.com/bukt0r');
-
-    const courseLink = screen.getByRole('link', {
-      name: 'RS School React course',
-    });
-    expect(courseLink).toHaveAttribute(
-      'href',
-      'https://rs.school/courses/reactjs',
-    );
-  });
-
-  it('renders 404 page for unknown routes', () => {
+  it('shows the not-found page inside the shared layout', () => {
     renderAppPage('/unknown-route');
 
     expect(
@@ -58,39 +38,30 @@ describe('App routing', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('Page not found.')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Search' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'About' })).toBeInTheDocument();
     expect(
       screen.getByRole('link', { name: 'Back to search' }),
     ).toHaveAttribute('href', '/');
   });
 
-  it('navigates between Search and About via header links', async () => {
-    const user = userEvent.setup();
-    renderAppPage('/?page=1');
-
-    expect(
-      screen.getByRole('heading', { level: 1, name: 'Item Search' }),
-    ).toBeInTheDocument();
-
-    await user.click(screen.getByRole('link', { name: 'About' }));
-    expect(
-      screen.getByRole('heading', { level: 1, name: 'About' }),
-    ).toBeInTheDocument();
-
-    await user.click(screen.getByRole('link', { name: 'Search' }));
-    expect(
-      screen.getByRole('heading', { level: 1, name: 'Item Search' }),
-    ).toBeInTheDocument();
-  });
-
-  it('returns to home from 404 via back link', async () => {
+  it('returns to search from not-found while keeping shared layout', async () => {
     const user = userEvent.setup();
     renderAppPage('/missing-page');
 
-    expect(screen.getByRole('link', { name: 'Search' })).toBeInTheDocument();
-
     await user.click(screen.getByRole('link', { name: 'Back to search' }));
+
     expect(
       screen.getByRole('heading', { level: 1, name: 'Item Search' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Search' })).toBeInTheDocument();
+  });
+
+  it('shows localized not-found content in Russian', () => {
+    renderAppPage('/unknown-route', 'ru');
+
+    expect(screen.getByText('Страница не найдена.')).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Вернуться к поиску' }),
     ).toBeInTheDocument();
   });
 });
