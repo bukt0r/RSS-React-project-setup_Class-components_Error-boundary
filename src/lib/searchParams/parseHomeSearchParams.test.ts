@@ -9,10 +9,12 @@ describe('parseHomeSearchParams', () => {
     expect(
       parseHomeSearchParams({
         page: '3',
+        q: 'Luke',
         details: '10',
       }),
     ).toEqual({
       currentPage: 3,
+      searchQuery: 'Luke',
       detailsId: '10',
       isDetailsOpen: true,
     });
