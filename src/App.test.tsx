@@ -24,7 +24,7 @@ describe('HomePage', () => {
     });
   });
 
-  it('loads initial data using query restored from storage', async () => {
+  it('keeps search input empty when storage contains a saved query', async () => {
     vi.mocked(useSearchStorage).mockReturnValue({
       readStoredSearch: () => 'Luke',
       saveTrimmedSearch: vi.fn(),
@@ -38,14 +38,31 @@ describe('HomePage', () => {
     renderHomePage();
 
     await waitFor(() => {
-      expect(fetchPeoplePage).toHaveBeenCalledWith('Luke', 1);
+      expect(fetchPeoplePage).toHaveBeenCalledWith('', 1);
     });
-    expect(screen.getByDisplayValue('Luke')).toBeInTheDocument();
-    await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { level: 3, name: 'Luke Skywalker' }),
-      ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Enter item name')).toHaveValue('');
+  });
+
+  it('allows editing search input freely', async () => {
+    const user = userEvent.setup();
+    vi.mocked(useSearchStorage).mockReturnValue({
+      readStoredSearch: () => null,
+      saveTrimmedSearch: vi.fn(),
     });
+    vi.mocked(fetchPeoplePage).mockResolvedValue({
+      items: [],
+      currentPage: 1,
+      totalPages: 1,
+    });
+
+    renderHomePage();
+
+    const input = screen.getByPlaceholderText('Enter item name');
+    expect(input).toHaveValue('');
+
+    await user.type(input, 'Leia');
+
+    expect(screen.getByDisplayValue('Leia')).toBeInTheDocument();
   });
 
   it('submits trimmed query, persists it and renders results', async () => {

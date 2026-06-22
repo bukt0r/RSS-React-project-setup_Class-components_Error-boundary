@@ -56,7 +56,7 @@ export function HomeSearchProvider({
   onToggleItemCheck,
 }: HomeSearchProviderProps) {
   const router = useRouter();
-  const { readStoredSearch, saveTrimmedSearch } = useSearchStorage();
+  const { saveTrimmedSearch } = useSearchStorage();
   const { searchParams, setSearchParams } = useAppSearchParams();
   const refreshResultsRef = useRef<(() => Promise<void>) | null>(null);
   const [draftSearch, setDraftSearch] = useState('');
@@ -106,20 +106,6 @@ export function HomeSearchProvider({
       updatePageInUrl(initialPage);
     }
   }, [initialPage, searchParams, updatePageInUrl]);
-
-  useEffect(() => {
-    const storedSearch = readStoredSearch();
-
-    if (storedSearch && !searchParams.get('q')) {
-      setSearchParams((prev) =>
-        buildHomeSearchQuery({
-          page: parsePageParam(prev.get('page') ?? String(initialPage)),
-          search: storedSearch,
-          detailsId: prev.get('details'),
-        }),
-      );
-    }
-  }, [initialPage, readStoredSearch, searchParams, setSearchParams]);
 
   const handleSearchInputChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
