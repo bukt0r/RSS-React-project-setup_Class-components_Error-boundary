@@ -93,9 +93,31 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => navigationState.searchParams,
 }));
 
+function buildMockPathname(
+  locale: 'en' | 'ru',
+  href: string | { pathname: string; query?: Record<string, string> },
+): string {
+  const pathname = typeof href === 'string' ? href : href.pathname;
+  const query = typeof href === 'object' ? href.query : undefined;
+  const localizedPath = pathname === '/' ? `/${locale}` : `/${locale}${pathname}`;
+
+  if (!query) {
+    return localizedPath;
+  }
+
+  return `${localizedPath}?${new URLSearchParams(query).toString()}`;
+}
+
 vi.mock('@/i18n/navigation', () => ({
   usePathname: () => navigationState.pathname,
   useRouter: () => router,
+  getPathname: ({
+    locale,
+    href,
+  }: {
+    locale: 'en' | 'ru';
+    href: string | { pathname: string; query?: Record<string, string> };
+  }) => buildMockPathname(locale, href),
   Link: ({
     href,
     children,
@@ -120,7 +142,6 @@ vi.mock('@/i18n/navigation', () => ({
       children,
     ),
   redirect: vi.fn(),
-  getPathname: vi.fn(),
 }));
 
 vi.mock('next/link', () => ({

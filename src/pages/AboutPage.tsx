@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import ExternalLink from '@/components/links/ExternalLink';
 import './AboutPage.css';
 
 const AUTHOR_GITHUB_URL = 'https://github.com/bukt0r';
@@ -24,24 +25,14 @@ function AboutPage() {
       <p className="about-page__text">{t('text')}</p>
       <p className="about-page__author">
         {t('author')}{' '}
-        <a
-          className="about-page__link"
-          href={AUTHOR_GITHUB_URL}
-          target="_blank"
-          rel="noreferrer"
-        >
+        <ExternalLink className="about-page__link" href={AUTHOR_GITHUB_URL}>
           vufimcev
-        </a>
+        </ExternalLink>
       </p>
       <p>
-        <a
-          className="about-page__link"
-          href={RS_REACT_COURSE_URL}
-          target="_blank"
-          rel="noreferrer"
-        >
+        <ExternalLink className="about-page__link" href={RS_REACT_COURSE_URL}>
           {t('courseLink')}
-        </a>
+        </ExternalLink>
       </p>
     </main>
   );

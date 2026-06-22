@@ -1,8 +1,10 @@
 'use client';
 
+import { useLocale } from 'next-intl';
 import { useCallback, type ReactNode } from 'react';
 import AppHeader from '@/components/layout/AppHeader';
 import SelectionFlyout from '@/components/SelectionFlyout';
+import type { AppLocale } from '@/i18n/routing';
 import { downloadSelectedItemsCsv } from '@/services/selectedItemsCsv';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
@@ -16,6 +18,7 @@ interface SharedLayoutProps {
 }
 
 function SharedLayout({ children }: SharedLayoutProps) {
+  const locale = useLocale() as AppLocale;
   const dispatch = useAppDispatch();
   const selectedCount = useAppSelector(selectSelectedItemsCount);
   const selectedItems = useAppSelector(selectSelectedItems);
@@ -25,8 +28,8 @@ function SharedLayout({ children }: SharedLayoutProps) {
   }, [dispatch]);
 
   const handleDownload = useCallback((): void => {
-    downloadSelectedItemsCsv(selectedItems);
-  }, [selectedItems]);
+    downloadSelectedItemsCsv(selectedItems, window.location.origin, locale);
+  }, [locale, selectedItems]);
 
   return (
     <div className="app-shell">

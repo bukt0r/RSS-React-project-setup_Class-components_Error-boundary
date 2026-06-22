@@ -22,21 +22,25 @@ describe('selectedItemsCsv', () => {
     expect(escapeCsvField('say "hi"')).toBe('"say ""hi"""');
   });
 
-  it('builds app details url with details query param', () => {
-    expect(buildAppDetailsUrl('https://example.com', '10')).toBe(
-      'https://example.com/?details=10',
+  it('builds app details url with locale-prefixed path and details query param', () => {
+    expect(buildAppDetailsUrl('https://example.com', '10', 'en')).toBe(
+      'https://example.com/en?page=1&details=10',
     );
-    expect(buildAppDetailsUrl('https://example.com/', '10')).toBe(
-      'https://example.com/?details=10',
+    expect(buildAppDetailsUrl('https://example.com/', '10', 'ru')).toBe(
+      'https://example.com/ru?page=1&details=10',
     );
   });
 
   it('builds csv content with headers and item fields', () => {
-    const csv = buildSelectedItemsCsvContent([sampleItem], 'https://example.com');
+    const csv = buildSelectedItemsCsvContent(
+      [sampleItem],
+      'https://example.com',
+      'en',
+    );
 
     expect(csv).toContain('id,name,description,app_details_url,api_url');
     expect(csv).toContain(
-      '10,Han Solo,Smuggler,https://example.com/?details=10,https://swapi.py4e.com/api/people/10/',
+      '10,Han Solo,Smuggler,https://example.com/en?page=1&details=10,https://swapi.py4e.com/api/people/10/',
     );
   });
 
