@@ -141,7 +141,24 @@ vi.mock('@/i18n/navigation', () => ({
       },
       children,
     ),
-  redirect: vi.fn(),
+  redirect: (
+    target:
+      | string
+      | {
+          href: { pathname: string; query?: Record<string, string> };
+          locale?: string;
+        },
+  ) => {
+    if (typeof target === 'string') {
+      navigate(target);
+      return;
+    }
+
+    const query = target.href.query
+      ? `?${new URLSearchParams(target.href.query).toString()}`
+      : '';
+    navigate(`${target.href.pathname}${query}`);
+  },
 }));
 
 vi.mock('next/link', () => ({

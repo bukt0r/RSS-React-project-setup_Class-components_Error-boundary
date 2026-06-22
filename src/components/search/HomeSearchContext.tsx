@@ -1,17 +1,21 @@
 'use client';
 
+import { useRouter } from '@/i18n/navigation';
+import { refreshSearchResultsAction } from '@/actions/refreshSearchResults';
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ChangeEvent,
   type ReactNode,
 } from 'react';
 import { useAppSearchParams } from '@/hooks/useAppSearchParams';
 import { useSearchStorage } from '@/hooks/useSearchStorage';
+import { buildHomeSearchQuery } from '@/lib/searchParams/buildHomeSearchQuery';
 import { parsePageParam } from '@/lib/searchParams/parseHomeSearchParams';
 import type { SearchResultItem } from '@/types/item';
 
@@ -23,13 +27,15 @@ interface HomeSearchContextValue {
   isDetailsOpen: boolean;
   hasPageParam: boolean;
   handleSearchInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  handleSearchClick: () => void;
+  handleSearchSubmit: () => void;
   handlePageChange: (page: number) => void;
   handleResultsPanelClick: () => void;
   openDetails: (id: string) => void;
   closeDetails: () => void;
   isItemChecked: (id: string) => boolean;
   handleToggleItemCheck: (item: SearchResultItem) => void;
+  registerResultsRefresh: (refresh: () => Promise<void>) => void;
+  triggerResultsRefresh: () => Promise<void>;
 }
 
 const HomeSearchContext = createContext<HomeSearchContextValue | null>(null);
@@ -49,15 +55,15 @@ export function HomeSearchProvider({
   isItemChecked,
   onToggleItemCheck,
 }: HomeSearchProviderProps) {
+  const router = useRouter();
   const { readStoredSearch, saveTrimmedSearch } = useSearchStorage();
   const { searchParams, setSearchParams } = useAppSearchParams();
-  const [searchInput, setSearchInput] = useState(() => readStoredSearch() ?? '');
-  const [committedSearch, setCommittedSearch] = useState(
-    () => readStoredSearch() ?? '',
-  );
-
+  const refreshResultsRef = useRef<(() => Promise<void>) | null>(null);
+  const [draftSearch, setDraftSearch] = useState(() => readStoredSearch() ?? '');
   const hasPageParam = Boolean(searchParams.get('page'));
   const currentPage = parsePageParam(searchParams.get('page') ?? String(initialPage));
+  const committedSearch = searchParams.get('q') ?? '';
+  const searchInput = searchParams.has('q') ? committedSearch : draftSearch;
   const detailsId = searchParams.get('details') ?? initialDetailsId;
   const isDetailsOpen = detailsId !== null;
 
@@ -72,21 +78,24 @@ export function HomeSearchProvider({
   const openDetails = useCallback(
     (id: string): void => {
       setSearchParams((prev) => {
-        const next = new URLSearchParams(prev);
-        next.set('details', id);
+        const next = buildHomeSearchQuery({
+          page: parsePageParam(prev.get('page') ?? String(initialPage)),
+          search: prev.get('q') ?? '',
+          detailsId: id,
+        });
         return next;
       });
     },
-    [setSearchParams],
+    [initialPage, setSearchParams],
   );
 
   const updatePageInUrl = useCallback(
     (page: number) => {
       setSearchParams((prev) => {
-        const next = new URLSearchParams(prev);
-        next.set('page', String(page));
-        next.delete('details');
-        return next;
+        return buildHomeSearchQuery({
+          page,
+          search: prev.get('q') ?? '',
+        });
       });
     },
     [setSearchParams],
@@ -98,10 +107,34 @@ export function HomeSearchProvider({
     }
   }, [initialPage, searchParams, updatePageInUrl]);
 
+  useEffect(() => {
+    const storedSearch = readStoredSearch();
+
+    if (storedSearch && !searchParams.get('q')) {
+      setSearchParams((prev) =>
+        buildHomeSearchQuery({
+          page: parsePageParam(prev.get('page') ?? String(initialPage)),
+          search: storedSearch,
+          detailsId: prev.get('details'),
+        }),
+      );
+    }
+  }, [initialPage, readStoredSearch, searchParams, setSearchParams]);
+
   const handleSearchInputChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
       const nextValue = event.target.value;
-      setSearchInput(nextValue);
+      setDraftSearch(nextValue);
+
+      if (searchParams.has('q')) {
+        setSearchParams((prev) =>
+          buildHomeSearchQuery({
+            page: 1,
+            search: '',
+            detailsId: prev.get('details'),
+          }),
+        );
+      }
 
       if (isDetailsOpen) {
         closeDetails();
@@ -111,33 +144,19 @@ export function HomeSearchProvider({
         updatePageInUrl(1);
       }
     },
-    [closeDetails, currentPage, isDetailsOpen, updatePageInUrl],
+    [
+      closeDetails,
+      currentPage,
+      isDetailsOpen,
+      searchParams,
+      setSearchParams,
+      updatePageInUrl,
+    ],
   );
 
-  const handleSearchClick = useCallback((): void => {
-    const trimmed = searchInput.trim();
-
-    if (currentPage !== 1) {
-      updatePageInUrl(1);
-    } else if (isDetailsOpen) {
-      closeDetails();
-    }
-
-    if (trimmed === committedSearch && currentPage === 1 && !isDetailsOpen) {
-      return;
-    }
-
-    setCommittedSearch(trimmed);
-    saveTrimmedSearch(trimmed);
-  }, [
-    closeDetails,
-    committedSearch,
-    currentPage,
-    isDetailsOpen,
-    saveTrimmedSearch,
-    searchInput,
-    updatePageInUrl,
-  ]);
+  const handleSearchSubmit = useCallback((): void => {
+    saveTrimmedSearch(searchInput.trim());
+  }, [saveTrimmedSearch, searchInput]);
 
   const handlePageChange = useCallback(
     (page: number): void => {
@@ -152,6 +171,21 @@ export function HomeSearchProvider({
     }
   }, [closeDetails, isDetailsOpen]);
 
+  const registerResultsRefresh = useCallback((refresh: () => Promise<void>) => {
+    refreshResultsRef.current = refresh;
+  }, []);
+
+  const triggerResultsRefresh = useCallback(async (): Promise<void> => {
+    try {
+      await refreshSearchResultsAction();
+      router.refresh();
+    } catch {
+      // revalidatePath is unavailable outside the Next.js request runtime (e.g. Vitest).
+    }
+
+    await refreshResultsRef.current?.();
+  }, [router]);
+
   const value = useMemo(
     () => ({
       searchInput,
@@ -161,13 +195,15 @@ export function HomeSearchProvider({
       isDetailsOpen,
       hasPageParam,
       handleSearchInputChange,
-      handleSearchClick,
+      handleSearchSubmit,
       handlePageChange,
       handleResultsPanelClick,
       openDetails,
       closeDetails,
       isItemChecked,
       handleToggleItemCheck: onToggleItemCheck,
+      registerResultsRefresh,
+      triggerResultsRefresh,
     }),
     [
       committedSearch,
@@ -175,15 +211,17 @@ export function HomeSearchProvider({
       detailsId,
       handlePageChange,
       handleResultsPanelClick,
-      handleSearchClick,
       handleSearchInputChange,
+      handleSearchSubmit,
       hasPageParam,
       isDetailsOpen,
       isItemChecked,
       onToggleItemCheck,
       openDetails,
       closeDetails,
+      registerResultsRefresh,
       searchInput,
+      triggerResultsRefresh,
     ],
   );
 

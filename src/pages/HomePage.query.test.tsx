@@ -67,7 +67,7 @@ describe('HomePage RTK Query behavior', () => {
     });
   });
 
-  it('reuses cached page data when returning to a previously visited page', async () => {
+  it('reloads page data when navigating back to a previously visited page', async () => {
     const user = userEvent.setup();
     vi.mocked(fetchPeoplePage)
       .mockResolvedValueOnce({
@@ -78,6 +78,11 @@ describe('HomePage RTK Query behavior', () => {
       .mockResolvedValueOnce({
         items: [createSearchResultItem('2', 'Person Two', 'Second page')],
         currentPage: 2,
+        totalPages: 2,
+      })
+      .mockResolvedValueOnce({
+        items: [createSearchResultItem('1', 'Person One', 'First page again')],
+        currentPage: 1,
         totalPages: 2,
       });
 
@@ -105,7 +110,7 @@ describe('HomePage RTK Query behavior', () => {
       ).toBeInTheDocument();
     });
 
-    expect(fetchPeoplePage).toHaveBeenCalledTimes(2);
+    expect(fetchPeoplePage).toHaveBeenCalledTimes(3);
   });
 
   it('refetches current page after manual refresh invalidates cache', async () => {
@@ -137,7 +142,7 @@ describe('HomePage RTK Query behavior', () => {
     expect(fetchPeoplePage).toHaveBeenCalledTimes(2);
   });
 
-  it('reuses cached person details when reopening the same item', async () => {
+  it('reloads person details when reopening the same item', async () => {
     const user = userEvent.setup();
     vi.mocked(fetchPeoplePage).mockResolvedValue({
       items: [createSearchResultItem('10', 'Han Solo', 'Smuggler')],
@@ -172,6 +177,6 @@ describe('HomePage RTK Query behavior', () => {
     await waitFor(() => {
       expect(screen.getByText('Smuggler details')).toBeInTheDocument();
     });
-    expect(fetchPersonById).toHaveBeenCalledTimes(1);
+    expect(fetchPersonById).toHaveBeenCalledTimes(2);
   });
 });

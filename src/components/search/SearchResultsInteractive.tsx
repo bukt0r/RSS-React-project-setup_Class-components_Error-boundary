@@ -1,13 +1,15 @@
 'use client';
 
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useGetPeoplePageQuery } from '@/api/swapiApi';
+import { searchPeopleAction } from '@/actions/searchPeople';
 import { useHomeSearch } from '@/components/search/HomeSearchContext';
 import CardList from '@/components/CardList';
 import ErrorBanner from '@/components/ErrorBanner';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import Pagination from '@/components/Pagination';
 import type { PeoplePageResult } from '@/services/swapiPeople';
+import type { LoadedPeoplePage } from '@/server/loadPeoplePage';
 
 interface SearchResultsInteractiveProps {
   initialPage: number;
@@ -37,6 +39,7 @@ function SearchResultsInteractive({
     openDetails,
     isItemChecked,
     handleToggleItemCheck,
+    registerResultsRefresh,
   } = useHomeSearch();
 
   const shouldUseServerSnapshot =
@@ -44,33 +47,66 @@ function SearchResultsInteractive({
     committedSearch === initialSearch &&
     currentPage === initialPage;
 
-  const {
-    data: queryData,
-    isFetching,
-    isSuccess,
-    isError,
-    error,
-  } = useGetPeoplePageQuery(
-    { searchFromInput: committedSearch, page: currentPage },
-    { skip: !hasPageParam },
+  const [clientResults, setClientResults] = useState<LoadedPeoplePage | null>(null);
+  const queryKey = `${committedSearch}::${currentPage}`;
+  const [loadedQueryKey, setLoadedQueryKey] = useState<string | null>(
+    shouldUseServerSnapshot ? queryKey : null,
   );
 
-  const usingServerSnapshot =
-    shouldUseServerSnapshot && queryData === undefined && !isFetching;
-  const peoplePageData =
-    queryData ?? (shouldUseServerSnapshot ? initialData : null);
-  const results = peoplePageData?.items ?? [];
-  const totalPages = peoplePageData?.totalPages ?? 1;
-  const isLoading = isFetching && peoplePageData === null;
-  const fetchError =
-    error instanceof Error
-      ? error.message
-      : isError
-        ? t('loadError')
-        : usingServerSnapshot
-          ? initialFetchError
-          : null;
-  const hasLoadedOnce = isSuccess || isError || shouldUseServerSnapshot;
+  const resultsState = shouldUseServerSnapshot
+    ? { data: initialData, error: initialFetchError }
+    : clientResults ?? { data: null, error: null };
+
+  const isLoading =
+    !shouldUseServerSnapshot && hasPageParam && loadedQueryKey !== queryKey;
+
+  const loadResults = useCallback(
+    async (search: string, page: number): Promise<void> => {
+      const result = await searchPeopleAction(search, page);
+      setClientResults(result);
+      setLoadedQueryKey(`${search}::${page}`);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    registerResultsRefresh(() => loadResults(committedSearch, currentPage));
+  }, [
+    committedSearch,
+    currentPage,
+    loadResults,
+    registerResultsRefresh,
+  ]);
+
+  useEffect(() => {
+    if (shouldUseServerSnapshot || !hasPageParam) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void searchPeopleAction(committedSearch, currentPage).then((result) => {
+      if (!cancelled) {
+        setClientResults(result);
+        setLoadedQueryKey(queryKey);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    committedSearch,
+    currentPage,
+    hasPageParam,
+    shouldUseServerSnapshot,
+    queryKey,
+  ]);
+
+  const results = resultsState.data?.items ?? [];
+  const totalPages = resultsState.data?.totalPages ?? 1;
+  const fetchError = resultsState.error;
+  const hasLoadedOnce = resultsState.data !== null || resultsState.error !== null;
   const heading = resultsHeading ?? t('results');
 
   return (

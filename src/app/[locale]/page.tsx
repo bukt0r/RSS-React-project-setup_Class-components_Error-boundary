@@ -1,11 +1,11 @@
 import { Suspense } from 'react';
 import { setRequestLocale } from 'next-intl/server';
+import PersonDetailsSection from '@/components/details/PersonDetailsSection';
 import HomePageClient from '@/components/search/HomePageClient';
 import HomePageLayout from '@/components/search/HomePageLayout';
 import PersonDetailsPanelShell from '@/components/search/PersonDetailsPanelShell';
 import SearchResultsSection from '@/components/search/SearchResultsSection';
 import { parseHomeSearchParams } from '@/lib/searchParams/parseHomeSearchParams';
-import PersonDetailsPanel from '@/pages/PersonDetailsPanel';
 import '@/App.css';
 
 export default async function HomeRoute({
@@ -25,7 +25,9 @@ export default async function HomeRoute({
       isDetailsOpen={parsed.isDetailsOpen}
       detailsPanel={
         <PersonDetailsPanelShell>
-          <PersonDetailsPanel />
+          <Suspense fallback={null}>
+            <PersonDetailsSection detailsId={parsed.detailsId} />
+          </Suspense>
         </PersonDetailsPanelShell>
       }
     >
@@ -36,7 +38,7 @@ export default async function HomeRoute({
         <Suspense fallback={null}>
           <SearchResultsSection
             page={parsed.currentPage}
-            search=""
+            search={parsed.searchQuery}
             detailsId={parsed.detailsId}
           />
         </Suspense>

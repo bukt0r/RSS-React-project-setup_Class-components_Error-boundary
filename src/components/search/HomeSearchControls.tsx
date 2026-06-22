@@ -1,36 +1,36 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useActionState, useState } from 'react';
+import { useFormStatus } from 'react-dom';
+import { useLocale } from 'next-intl';
 import { useTranslations } from 'next-intl';
-import { swapiApi, useGetPeoplePageQuery } from '@/api/swapiApi';
+import { submitSearchAction } from '@/actions/submitSearch';
 import { useHomeSearch } from '@/components/search/HomeSearchContext';
 import ErrorSpike from '@/components/ErrorSpike';
-import { useAppDispatch } from '@/store/hooks';
+
+function SearchSubmitButton() {
+  const t = useTranslations('home');
+  const { pending } = useFormStatus();
+
+  return (
+    <button type="submit" disabled={pending}>
+      {t('search')}
+    </button>
+  );
+}
 
 function HomeSearchControls() {
   const t = useTranslations('home');
-  const dispatch = useAppDispatch();
+  const locale = useLocale();
   const {
     searchInput,
-    committedSearch,
-    currentPage,
     hasPageParam,
     handleSearchInputChange,
-    handleSearchClick,
+    handleSearchSubmit,
+    triggerResultsRefresh,
   } = useHomeSearch();
   const [simulateCrash, setSimulateCrash] = useState(false);
-  const { isFetching } = useGetPeoplePageQuery(
-    { searchFromInput: committedSearch, page: currentPage },
-    { skip: !hasPageParam },
-  );
-
-  const handleRefreshResults = useCallback((): void => {
-    dispatch(
-      swapiApi.util.invalidateTags([
-        { type: 'PeoplePage', id: `${committedSearch.trim()}::${currentPage}` },
-      ]),
-    );
-  }, [committedSearch, currentPage, dispatch]);
+  const [, submitSearch, isSearchPending] = useActionState(submitSearchAction, null);
 
   return (
     <>
@@ -40,25 +40,29 @@ function HomeSearchControls() {
         onClick={(event) => event.stopPropagation()}
       >
         <h1>{t('title')}</h1>
-        <div className="search-controls">
+        <form
+          action={submitSearch}
+          className="search-controls"
+          onSubmit={handleSearchSubmit}
+        >
           <input
             type="text"
+            name="search"
             placeholder={t('searchPlaceholder')}
             value={searchInput}
             onChange={handleSearchInputChange}
-            disabled={isFetching}
+            disabled={isSearchPending}
           />
-          <button type="button" onClick={handleSearchClick} disabled={isFetching}>
-            {t('search')}
-          </button>
+          <input type="hidden" name="locale" value={locale} />
+          <SearchSubmitButton />
           <button
             type="button"
-            onClick={handleRefreshResults}
-            disabled={isFetching || !hasPageParam}
+            onClick={() => void triggerResultsRefresh()}
+            disabled={isSearchPending || !hasPageParam}
           >
             {t('refresh')}
           </button>
-        </div>
+        </form>
       </section>
 
       <div
