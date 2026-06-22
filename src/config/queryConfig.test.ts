@@ -6,19 +6,19 @@ describe('queryConfig', () => {
   });
 
   it('returns default TTL when env variable is missing', () => {
-    vi.stubEnv('VITE_SWAPI_CACHE_TTL_SECONDS', '');
+    vi.stubEnv('NEXT_PUBLIC_SWAPI_CACHE_TTL_SECONDS', '');
 
     expect(getSwapiCacheTtlSeconds()).toBe(300);
   });
 
   it('returns parsed TTL from env variable', () => {
-    vi.stubEnv('VITE_SWAPI_CACHE_TTL_SECONDS', '120');
+    vi.stubEnv('NEXT_PUBLIC_SWAPI_CACHE_TTL_SECONDS', '120');
 
     expect(getSwapiCacheTtlSeconds()).toBe(120);
   });
 
   it('falls back to default for invalid env value', () => {
-    vi.stubEnv('VITE_SWAPI_CACHE_TTL_SECONDS', 'invalid');
+    vi.stubEnv('NEXT_PUBLIC_SWAPI_CACHE_TTL_SECONDS', 'invalid');
 
     expect(getSwapiCacheTtlSeconds()).toBe(300);
   });
