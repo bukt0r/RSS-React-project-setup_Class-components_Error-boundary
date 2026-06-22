@@ -2,6 +2,7 @@ import { createElement, type MouseEvent, type ReactNode } from 'react';
 import { vi } from 'vitest';
 
 const navigationState = vi.hoisted(() => ({
+  locale: 'en' as 'en' | 'ru',
   pathname: '/',
   searchParams: new URLSearchParams('page=1'),
   listeners: new Set<() => void>(),
@@ -27,6 +28,10 @@ export function getNavigationSnapshot(): number {
   return navigationState.version;
 }
 
+export function getNavigationLocale(): 'en' | 'ru' {
+  return navigationState.locale;
+}
+
 export function getNavigationPathname(): string {
   return navigationState.pathname;
 }
@@ -39,6 +44,7 @@ export function subscribeNavigation(listener: () => void): () => void {
 }
 
 export function resetNavigation(): void {
+  navigationState.locale = 'en';
   navigationState.pathname = '/';
   navigationState.searchParams = new URLSearchParams('page=1');
   notifyNavigation();
@@ -65,8 +71,18 @@ function navigate(href: string): void {
 }
 
 const router = {
-  replace: navigate,
-  push: navigate,
+  replace: (href: string, options?: { locale?: string }) => {
+    if (options?.locale) {
+      navigationState.locale = options.locale as 'en' | 'ru';
+      notifyNavigation();
+      return;
+    }
+
+    navigate(href);
+  },
+  push: (href: string, options?: { locale?: string }) => {
+    router.replace(href, options);
+  },
   refresh: vi.fn(),
   back: vi.fn(),
   forward: vi.fn(),

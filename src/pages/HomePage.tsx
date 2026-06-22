@@ -6,6 +6,7 @@ import {
   useState,
   type ChangeEvent,
 } from 'react';
+import { useTranslations } from 'next-intl';
 import PersonDetailsPanel from './PersonDetailsPanel';
 import { useAppSearchParams } from '../hooks/useAppSearchParams';
 import { swapiApi, useGetPeoplePageQuery } from '../api/swapiApi';
@@ -31,6 +32,7 @@ function parsePageParam(value: string | null): number {
 }
 
 function HomePage() {
+  const t = useTranslations('home');
   const dispatch = useAppDispatch();
   const selectedItemsById = useAppSelector(selectSelectedItemsById);
   const { readStoredSearch, saveTrimmedSearch } = useSearchStorage();
@@ -65,7 +67,7 @@ function HomePage() {
     error instanceof Error
       ? error.message
       : isError
-        ? 'Unable to load data. Please try again.'
+        ? t('loadError')
         : null;
   const hasLoadedOnce = isSuccess || isError;
 
@@ -177,14 +179,14 @@ function HomePage() {
       <div className="home-split__main">
       <section
         className="search-section"
-        aria-label="Search section"
+        aria-label={t('searchSection')}
         onClick={(event) => event.stopPropagation()}
       >
-        <h1>Item Search</h1>
+        <h1>{t('title')}</h1>
         <div className="search-controls">
           <input
             type="text"
-            placeholder="Enter item name"
+            placeholder={t('searchPlaceholder')}
             value={searchInput}
             onChange={handleSearchInputChange}
             disabled={isLoading}
@@ -194,33 +196,33 @@ function HomePage() {
             onClick={handleSearchClick}
             disabled={isLoading}
           >
-            Search
+            {t('search')}
           </button>
           <button
             type="button"
             onClick={handleRefreshResults}
             disabled={isLoading || !hasPageParam}
           >
-            Refresh
+            {t('refresh')}
           </button>
         </div>
       </section>
 
       <section
         className="results-section"
-        aria-label="Results section"
+        aria-label={t('resultsSection')}
         onClick={handleResultsPanelClick}
       >
-        <h2>Results</h2>
+        <h2>{t('results')}</h2>
         <ErrorBanner message={fetchError} />
         <div className="results-section__panel">
           {isLoading ? (
             <div
               className="results-section__overlay"
               aria-busy="true"
-              aria-label="Loading results"
+              aria-label={t('loadingResults')}
             >
-              <LoadingSpinner label="Loading results" />
+              <LoadingSpinner label={t('loadingResults')} />
             </div>
           ) : null}
           <div className="results-section__body">
@@ -249,7 +251,7 @@ function HomePage() {
         onClick={(event) => event.stopPropagation()}
       >
         <button type="button" onClick={handleTestErrorClick}>
-          Test error
+          {t('testError')}
         </button>
       </div>
 

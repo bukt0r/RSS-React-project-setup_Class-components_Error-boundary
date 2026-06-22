@@ -1,4 +1,7 @@
+'use client';
+
 import type { ChangeEvent, MouseEvent } from 'react';
+import { useTranslations } from 'next-intl';
 import type { SearchResultItem } from '../types/item';
 
 interface CardProps {
@@ -16,6 +19,8 @@ function Card({
   onToggleCheck,
   onOpenDetails,
 }: CardProps) {
+  const t = useTranslations('card');
+
   const handleCheckboxChange = (event: ChangeEvent<HTMLInputElement>): void => {
     event.stopPropagation();
     onToggleCheck(item);
@@ -39,8 +44,8 @@ function Card({
     .join(' ');
 
   const checkboxLabel = item.name
-    ? `Select ${item.name}`
-    : 'Select item';
+    ? t('selectNamed', { name: item.name })
+    : t('selectItem');
 
   return (
     <article className={cardClassName}>

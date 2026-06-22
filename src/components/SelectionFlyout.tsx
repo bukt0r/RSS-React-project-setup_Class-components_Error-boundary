@@ -1,3 +1,6 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
 import './SelectionFlyout.css';
 
 interface SelectionFlyoutProps {
@@ -11,28 +14,29 @@ function SelectionFlyout({
   onUnselectAll,
   onDownload,
 }: SelectionFlyoutProps) {
+  const t = useTranslations('selectionFlyout');
+  const tActions = useTranslations('selectionFlyoutActions');
+
   if (selectedCount === 0) {
     return null;
   }
-
-  const itemLabel = selectedCount === 1 ? 'item' : 'items';
 
   return (
     <aside
       className="selection-flyout"
       role="region"
-      aria-label="Selected items summary"
+      aria-label={t('summary')}
       aria-live="polite"
     >
       <p className="selection-flyout__count">
-        {selectedCount} {itemLabel} selected
+        {t('selectedCount', { count: selectedCount })}
       </p>
       <div className="selection-flyout__actions">
         <button type="button" onClick={onUnselectAll}>
-          Unselect all
+          {tActions('unselectAll')}
         </button>
         <button type="button" onClick={onDownload}>
-          Download
+          {tActions('download')}
         </button>
       </div>
     </aside>

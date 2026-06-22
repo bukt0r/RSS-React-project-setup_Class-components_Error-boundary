@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ThemeSwitcher from '../components/ThemeSwitcher';
+import { renderWithProviders } from '../test-utils/renderWithProviders';
 import ThemeProvider from './ThemeProvider';
 
 function resetDocumentTheme(): void {
@@ -27,11 +28,7 @@ describe('ThemeProvider', () => {
   it('updates document theme when user selects dark', async () => {
     const user = userEvent.setup();
 
-    render(
-      <ThemeProvider>
-        <ThemeSwitcher />
-      </ThemeProvider>,
-    );
+    renderWithProviders(<ThemeSwitcher />);
 
     await user.click(screen.getByRole('radio', { name: 'Dark' }));
 

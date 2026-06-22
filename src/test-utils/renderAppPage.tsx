@@ -7,6 +7,7 @@ import NotFoundPage from '../pages/NotFoundPage';
 import PersonDetailsPanel from '../pages/PersonDetailsPanel';
 import NavigationSync from './NavigationSync';
 import { setNextNavigation } from './nextNavigationMock';
+import type { AppLocale } from '../i18n/routing';
 import { renderWithProviders } from './renderWithProviders';
 
 function AppRouterPage() {
@@ -23,7 +24,10 @@ function AppRouterPage() {
   return <NotFoundPage />;
 }
 
-export function renderAppPage(initialPath = '/?page=1') {
+export function renderAppPage(
+  initialPath = '/?page=1',
+  locale: AppLocale = 'en',
+) {
   setNextNavigation(initialPath);
 
   return renderWithProviders(
@@ -34,14 +38,19 @@ export function renderAppPage(initialPath = '/?page=1') {
         </AppShell>
       )}
     </NavigationSync>,
+    { locale },
   );
 }
 
-export function renderHomePage(initialPath = '/?page=1') {
+export function renderHomePage(
+  initialPath = '/?page=1',
+  locale: AppLocale = 'en',
+) {
   setNextNavigation(initialPath);
 
   return renderWithProviders(
     <NavigationSync>{() => <HomePage />}</NavigationSync>,
+    { locale },
   );
 }
 

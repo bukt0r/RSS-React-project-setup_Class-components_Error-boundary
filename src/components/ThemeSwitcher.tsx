@@ -1,9 +1,13 @@
+'use client';
+
 import type { ChangeEvent } from 'react';
+import { useTranslations } from 'next-intl';
 import { useTheme } from '../context/useTheme';
 import type { Theme } from '../context/themeContext';
 import './ThemeSwitcher.css';
 
 function ThemeSwitcher() {
+  const t = useTranslations('theme');
   const { theme, setTheme } = useTheme();
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
@@ -12,7 +16,7 @@ function ThemeSwitcher() {
 
   return (
     <fieldset className="theme-switcher">
-      <legend className="theme-switcher__legend">Theme</legend>
+      <legend className="theme-switcher__legend">{t('legend')}</legend>
       <div className="theme-switcher__options">
         <label className="theme-switcher__option">
           <input
@@ -22,7 +26,7 @@ function ThemeSwitcher() {
             checked={theme === 'light'}
             onChange={handleChange}
           />
-          Light
+          {t('light')}
         </label>
         <label className="theme-switcher__option">
           <input
@@ -32,7 +36,7 @@ function ThemeSwitcher() {
             checked={theme === 'dark'}
             onChange={handleChange}
           />
-          Dark
+          {t('dark')}
         </label>
       </div>
     </fieldset>

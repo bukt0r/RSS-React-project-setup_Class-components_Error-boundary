@@ -1,6 +1,7 @@
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import CardList from './CardList';
 import { createSearchResultItem } from '../test-utils/createSearchResultItem';
+import { renderWithProviders } from '../test-utils/renderWithProviders';
 
 const defaultHandlers = {
   detailsId: null,
@@ -11,7 +12,7 @@ const defaultHandlers = {
 
 describe('CardList', () => {
   it('shows empty state when items array is empty', () => {
-    render(<CardList items={[]} {...defaultHandlers} />);
+    renderWithProviders(<CardList items={[]} {...defaultHandlers} />);
 
     expect(screen.getByRole('status')).toBeInTheDocument();
     expect(screen.getByText('No results to show yet.')).toBeInTheDocument();
@@ -19,7 +20,7 @@ describe('CardList', () => {
   });
 
   it('renders a list with one card per item', () => {
-    render(
+    renderWithProviders(
       <CardList
         items={[
           createSearchResultItem('1', 'First', 'Desc A'),
@@ -44,7 +45,7 @@ describe('CardList', () => {
   });
 
   it('reflects checked state from isItemChecked', () => {
-    render(
+    renderWithProviders(
       <CardList
         items={[createSearchResultItem('1', 'First', 'Desc A')]}
         {...defaultHandlers}
@@ -56,7 +57,7 @@ describe('CardList', () => {
   });
 
   it('marks details-active card when detailsId matches', () => {
-    render(
+    renderWithProviders(
       <CardList
         items={[
           createSearchResultItem('1', 'Same', 'One'),

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { useAppSearchParams } from '../hooks/useAppSearchParams';
 import { swapiApi, useGetPersonByIdQuery } from '../api/swapiApi';
 import ErrorBanner from '../components/ErrorBanner';
@@ -9,6 +10,7 @@ import { useAppDispatch } from '../store/hooks';
 import './PersonDetailsPanel.css';
 
 function PersonDetailsPanel() {
+  const t = useTranslations('details');
   const dispatch = useAppDispatch();
   const { searchParams, setSearchParams } = useAppSearchParams();
   const detailsId = searchParams.get('details');
@@ -20,10 +22,8 @@ function PersonDetailsPanel() {
     if (!isError) {
       return null;
     }
-    return error instanceof Error
-      ? error.message
-      : 'Unable to load details. Please try again.';
-  }, [error, isError]);
+    return error instanceof Error ? error.message : t('loadError');
+  }, [error, isError, t]);
   const isLoading = isFetching;
 
   const closeDetails = (): void => {
@@ -48,19 +48,19 @@ function PersonDetailsPanel() {
   return (
     <section
       className="person-details"
-      aria-label="Item details"
+      aria-label={t('itemDetails')}
       onClick={(event) => event.stopPropagation()}
       onKeyDown={(event) => event.stopPropagation()}
     >
       <div className="person-details__header">
-        <h2 className="person-details__title">Details</h2>
+        <h2 className="person-details__title">{t('title')}</h2>
         <button
           type="button"
           className="person-details__close"
           onClick={closeDetails}
-          aria-label="Close details"
+          aria-label={t('closeLabel')}
         >
-          Close
+          {t('close')}
         </button>
         <button
           type="button"
@@ -68,7 +68,7 @@ function PersonDetailsPanel() {
           onClick={handleRefreshDetails}
           disabled={isLoading}
         >
-          Refresh
+          {t('refresh')}
         </button>
       </div>
 
@@ -76,7 +76,7 @@ function PersonDetailsPanel() {
 
       {isLoading ? (
         <div className="person-details__loading" aria-busy="true">
-          <LoadingSpinner label="Loading details" />
+          <LoadingSpinner label={t('loading')} />
         </div>
       ) : null}
 

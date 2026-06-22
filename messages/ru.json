@@ -2,5 +2,75 @@
   "app": {
     "title": "RS React App",
     "description": "RSS React Course — миграция на Next.js SSR"
+  },
+  "nav": {
+    "main": "Основная навигация",
+    "search": "Поиск",
+    "about": "О проекте"
+  },
+  "home": {
+    "title": "Поиск объектов",
+    "searchSection": "Раздел поиска",
+    "searchPlaceholder": "Введите название объекта",
+    "search": "Искать",
+    "refresh": "Обновить",
+    "results": "Результаты",
+    "resultsSection": "Раздел результатов",
+    "loadingResults": "Загрузка результатов",
+    "testError": "Тестовая ошибка",
+    "loadError": "Не удалось загрузить данные. Попробуйте ещё раз."
+  },
+  "pagination": {
+    "label": "Пагинация результатов",
+    "previous": "Назад",
+    "next": "Вперёд",
+    "pageStatus": "Страница {current} из {total}"
+  },
+  "selectionFlyout": {
+    "summary": "Сводка выбранных элементов",
+    "selectedCount": "{count, plural, one {Выбран # элемент} few {Выбрано # элемента} many {Выбрано # элементов} other {Выбрано # элементов}}"
+  },
+  "selectionFlyoutActions": {
+    "unselectAll": "Снять выбор",
+    "download": "Скачать"
+  },
+  "theme": {
+    "legend": "Тема",
+    "light": "Светлая",
+    "dark": "Тёмная"
+  },
+  "languageSwitcher": {
+    "legend": "Язык",
+    "en": "English",
+    "ru": "Русский"
+  },
+  "details": {
+    "title": "Подробности",
+    "close": "Закрыть",
+    "closeLabel": "Закрыть подробности",
+    "refresh": "Обновить",
+    "loading": "Загрузка подробностей",
+    "itemDetails": "Подробности объекта",
+    "loadError": "Не удалось загрузить подробности. Попробуйте ещё раз."
+  },
+  "card": {
+    "selectItem": "Выбрать элемент",
+    "selectNamed": "Выбрать {name}"
+  },
+  "about": {
+    "title": "О проекте",
+    "text": "Item Search — учебный проект курса React Rolling Scopes School.",
+    "author": "Автор:",
+    "courseLink": "Курс React RS School"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Страница не найдена.",
+    "backToSearch": "Вернуться к поиску"
+  },
+  "errorBoundary": {
+    "title": "Что-то пошло не так",
+    "fallback": "Произошла непредвиденная ошибка.",
+    "tryAgain": "Попробовать снова"
   }
 }

@@ -1,7 +1,8 @@
-import { Component } from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AppErrorBoundary from './AppErrorBoundary';
+import { renderWithProviders } from '../test-utils/renderWithProviders';
+import { Component } from 'react';
 
 class CrashOnRender extends Component {
   render() {
@@ -12,10 +13,10 @@ class CrashOnRender extends Component {
 
 describe('AppErrorBoundary', () => {
   it('renders children when no error is thrown', () => {
-    render(
+    renderWithProviders(
       <AppErrorBoundary>
         <p>Safe content</p>
-      </AppErrorBoundary>
+      </AppErrorBoundary>,
     );
 
     expect(screen.getByText('Safe content')).toBeInTheDocument();
@@ -27,15 +28,15 @@ describe('AppErrorBoundary', () => {
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
 
-    render(
+    renderWithProviders(
       <AppErrorBoundary>
         <CrashOnRender />
-      </AppErrorBoundary>
+      </AppErrorBoundary>,
     );
 
     expect(screen.getByRole('alert')).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { name: 'Something went wrong' })
+      screen.getByRole('heading', { name: 'Something went wrong' }),
     ).toBeInTheDocument();
     expect(screen.getByText('Boundary crash test')).toBeInTheDocument();
 

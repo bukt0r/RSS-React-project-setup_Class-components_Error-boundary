@@ -1,0 +1,23 @@
+.language-switcher {
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 8px;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+}
+
+.language-switcher__legend {
+  font-size: 0.875rem;
+  padding: 0 0.25rem;
+}
+
+.language-switcher__options {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.language-switcher__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}

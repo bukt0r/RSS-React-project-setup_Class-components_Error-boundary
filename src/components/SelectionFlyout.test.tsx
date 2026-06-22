@@ -1,10 +1,11 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SelectionFlyout from './SelectionFlyout';
+import { renderWithProviders } from '../test-utils/renderWithProviders';
 
 describe('SelectionFlyout', () => {
   it('renders nothing when selected count is zero', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <SelectionFlyout
         selectedCount={0}
         onUnselectAll={vi.fn()}
@@ -16,7 +17,7 @@ describe('SelectionFlyout', () => {
   });
 
   it('shows selected count and action buttons', () => {
-    render(
+    renderWithProviders(
       <SelectionFlyout
         selectedCount={3}
         onUnselectAll={vi.fn()}
@@ -35,7 +36,7 @@ describe('SelectionFlyout', () => {
   });
 
   it('uses singular label for one selected item', () => {
-    render(
+    renderWithProviders(
       <SelectionFlyout
         selectedCount={1}
         onUnselectAll={vi.fn()}
@@ -51,7 +52,7 @@ describe('SelectionFlyout', () => {
     const onUnselectAll = vi.fn();
     const onDownload = vi.fn();
 
-    render(
+    renderWithProviders(
       <SelectionFlyout
         selectedCount={2}
         onUnselectAll={onUnselectAll}

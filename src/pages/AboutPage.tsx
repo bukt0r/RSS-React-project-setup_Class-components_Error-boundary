@@ -1,18 +1,21 @@
+'use client';
+
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import './AboutPage.css';
 
 const AUTHOR_GITHUB_URL = 'https://github.com/bukt0r';
 const RS_REACT_COURSE_URL = 'https://rs.school/courses/reactjs';
 
 function AboutPage() {
+  const t = useTranslations('about');
+
   return (
     <main className="about-page">
-      <h1>About</h1>
-      <p className="about-page__text">
-        Item Search is a training project for the Rolling Scopes School React
-        course.
-      </p>
+      <h1>{t('title')}</h1>
+      <p className="about-page__text">{t('text')}</p>
       <p className="about-page__author">
-        Author:{' '}
+        {t('author')}{' '}
         <a
           className="about-page__link"
           href={AUTHOR_GITHUB_URL}
@@ -29,7 +32,7 @@ function AboutPage() {
           target="_blank"
           rel="noreferrer"
         >
-          RS School React course
+          {t('courseLink')}
         </a>
       </p>
     </main>

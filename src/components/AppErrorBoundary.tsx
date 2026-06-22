@@ -1,4 +1,5 @@
 import { Component, Fragment, type ErrorInfo, type ReactNode } from 'react';
+import ErrorBoundaryFallback from './ErrorBoundaryFallback';
 import './AppErrorBoundary.css';
 
 interface AppErrorBoundaryProps {
@@ -40,19 +41,10 @@ class AppErrorBoundary extends Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="error-boundary-fallback" role="alert">
-          <h1 className="error-boundary-fallback__title">Something went wrong</h1>
-          <p className="error-boundary-fallback__message">
-            {this.state.error?.message ?? 'An unexpected error occurred.'}
-          </p>
-          <button
-            type="button"
-            className="error-boundary-fallback__retry"
-            onClick={this.handleReset}
-          >
-            Try again
-          </button>
-        </div>
+        <ErrorBoundaryFallback
+          message={this.state.error?.message ?? ''}
+          onRetry={this.handleReset}
+        />
       );
     }
 
