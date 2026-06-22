@@ -59,7 +59,7 @@ export function HomeSearchProvider({
   const { readStoredSearch, saveTrimmedSearch } = useSearchStorage();
   const { searchParams, setSearchParams } = useAppSearchParams();
   const refreshResultsRef = useRef<(() => Promise<void>) | null>(null);
-  const [draftSearch, setDraftSearch] = useState(() => readStoredSearch() ?? '');
+  const [draftSearch, setDraftSearch] = useState('');
   const hasPageParam = Boolean(searchParams.get('page'));
   const currentPage = parsePageParam(searchParams.get('page') ?? String(initialPage));
   const committedSearch = searchParams.get('q') ?? '';

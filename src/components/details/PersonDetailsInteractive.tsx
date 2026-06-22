@@ -15,7 +15,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import PersonDetailsView from '@/components/details/PersonDetailsView';
 import type { LoadedPersonDetails } from '@/server/loadPersonById';
 import type { SearchResultItem } from '@/types/item';
-import '@/pages/PersonDetailsPanel.css';
+import '@/views/PersonDetailsPanel.css';
 
 interface PersonDetailsInteractiveProps {
   detailsId: string;

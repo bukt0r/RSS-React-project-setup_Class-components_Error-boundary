@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import AboutPageView from '../../components/about/AboutPageView';
-import HomePage from '../../pages/HomePage';
-import NotFoundPage from '../../pages/NotFoundPage';
+import HomePage from '../../views/HomePage';
+import NotFoundPage from '../../views/NotFoundPage';
 import SharedLayout from './SharedLayout';
 import { fetchPeoplePage } from '../../services/swapiPeople';
 import { readStoredSearchRaw } from '../../services/searchStorage';

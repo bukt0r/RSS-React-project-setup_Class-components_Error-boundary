@@ -31,4 +31,15 @@ describe('searchStorage', () => {
     expect(setItemSpy).not.toHaveBeenCalled();
     expect(localStorage.getItem('searchQuery')).toBe('Han');
   });
+
+  it('returns null when localStorage is unavailable', () => {
+    const windowSpy = vi.spyOn(globalThis, 'window', 'get').mockReturnValue(
+      undefined as unknown as Window & typeof globalThis,
+    );
+
+    expect(readStoredSearchRaw()).toBeNull();
+    expect(() => writeStoredSearchTrimmed('Luke')).not.toThrow();
+
+    windowSpy.mockRestore();
+  });
 });
