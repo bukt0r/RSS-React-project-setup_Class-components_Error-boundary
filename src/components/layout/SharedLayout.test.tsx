@@ -1,10 +1,11 @@
 import { screen, waitFor } from '@testing-library/react';
-import AboutPage from '../../pages/AboutPage';
+import AboutPageView from '../../components/about/AboutPageView';
 import HomePage from '../../pages/HomePage';
 import NotFoundPage from '../../pages/NotFoundPage';
 import SharedLayout from './SharedLayout';
 import { fetchPeoplePage } from '../../services/swapiPeople';
 import { readStoredSearchRaw } from '../../services/searchStorage';
+import { getAboutPageContent } from '../../test-utils/aboutPageContent';
 import { renderWithProviders } from '../../test-utils/renderWithProviders';
 import NavigationSync from '../../test-utils/NavigationSync';
 import { setNextNavigation } from '../../test-utils/nextNavigationMock';
@@ -56,7 +57,7 @@ describe('SharedLayout', () => {
   it('renders navigation on the about page', () => {
     renderWithProviders(
       <SharedLayout>
-        <AboutPage />
+        <AboutPageView {...getAboutPageContent()} />
       </SharedLayout>,
     );
 

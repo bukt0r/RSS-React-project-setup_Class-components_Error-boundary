@@ -1,20 +1,21 @@
 import type { ReactElement } from 'react';
+import AboutPageView from '../components/about/AboutPageView';
 import { usePathname } from '@/i18n/navigation';
 import SharedLayout from '../components/layout/SharedLayout';
-import AboutPage from '../pages/AboutPage';
 import HomePage from '../pages/HomePage';
 import NotFoundPage from '../pages/NotFoundPage';
 import PersonDetailsPanel from '../pages/PersonDetailsPanel';
+import { getAboutPageContent } from './aboutPageContent';
 import NavigationSync from './NavigationSync';
 import { setNextNavigation } from './nextNavigationMock';
 import type { AppLocale } from '../i18n/routing';
 import { renderWithProviders } from './renderWithProviders';
 
-function AppRouterPage() {
+function AppRouterPage({ locale }: { locale: AppLocale }) {
   const pathname = usePathname();
 
   if (pathname === '/about') {
-    return <AboutPage />;
+    return <AboutPageView {...getAboutPageContent(locale)} />;
   }
 
   if (pathname === '/') {
@@ -34,7 +35,7 @@ export function renderAppPage(
     <NavigationSync>
       {() => (
         <SharedLayout>
-          <AppRouterPage />
+          <AppRouterPage locale={locale} />
         </SharedLayout>
       )}
     </NavigationSync>,
