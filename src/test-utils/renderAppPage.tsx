@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { usePathname } from '@/i18n/navigation';
-import AppShell from '../components/AppShell';
+import SharedLayout from '../components/layout/SharedLayout';
 import AboutPage from '../pages/AboutPage';
 import HomePage from '../pages/HomePage';
 import NotFoundPage from '../pages/NotFoundPage';
@@ -33,9 +33,9 @@ export function renderAppPage(
   return renderWithProviders(
     <NavigationSync>
       {() => (
-        <AppShell>
+        <SharedLayout>
           <AppRouterPage />
-        </AppShell>
+        </SharedLayout>
       )}
     </NavigationSync>,
     { locale },
@@ -62,10 +62,13 @@ export function renderPersonDetailsPanel(initialPath = '/?page=1&details=1') {
   );
 }
 
-export function renderWithAppShell(children: ReactElement, initialPath = '/?page=1') {
+export function renderWithSharedLayout(
+  children: ReactElement,
+  initialPath = '/?page=1',
+) {
   setNextNavigation(initialPath);
 
   return renderWithProviders(
-    <NavigationSync>{() => <AppShell>{children}</AppShell>}</NavigationSync>,
+    <NavigationSync>{() => <SharedLayout>{children}</SharedLayout>}</NavigationSync>,
   );
 }
