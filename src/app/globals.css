@@ -1,0 +1,25 @@
+@import '../index.css';
+@import '../App.css';
+
+body {
+  margin: 0;
+}
+
+main {
+  flex: 1;
+  padding: 24px;
+}
+
+.migration-placeholder {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.migration-placeholder p + p {
+  margin-top: 12px;
+}
+
+.migration-placeholder__theme {
+  margin-top: 16px;
+}

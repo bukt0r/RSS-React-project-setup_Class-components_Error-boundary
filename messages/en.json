@@ -1,0 +1,77 @@
+{
+  "app": {
+    "title": "RS React App",
+    "description": "RSS React Course — Next.js SSR migration"
+  },
+  "nav": {
+    "main": "Main navigation",
+    "search": "Search",
+    "about": "About"
+  },
+  "home": {
+    "title": "Item Search",
+    "searchSection": "Search section",
+    "searchPlaceholder": "Enter item name",
+    "search": "Search",
+    "refresh": "Refresh",
+    "results": "Results",
+    "resultsSection": "Results section",
+    "loadingResults": "Loading results",
+    "testError": "Test error",
+    "loadError": "Unable to load data. Please try again."
+  },
+  "pagination": {
+    "label": "Results pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "pageStatus": "Page {current} of {total}"
+  },
+  "selectionFlyout": {
+    "summary": "Selected items summary",
+    "selectedCount": "{count, plural, one {# item selected} other {# items selected}}"
+  },
+  "selectionFlyoutActions": {
+    "unselectAll": "Unselect all",
+    "download": "Download"
+  },
+  "theme": {
+    "legend": "Theme",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "languageSwitcher": {
+    "legend": "Language",
+    "en": "English",
+    "ru": "Russian"
+  },
+  "details": {
+    "title": "Details",
+    "close": "Close",
+    "closeLabel": "Close details",
+    "refresh": "Refresh",
+    "loading": "Loading details",
+    "itemDetails": "Item details",
+    "loadError": "Unable to load details. Please try again."
+  },
+  "card": {
+    "selectItem": "Select item",
+    "selectNamed": "Select {name}"
+  },
+  "about": {
+    "title": "About",
+    "logoAlt": "Item Search logo",
+    "text": "Item Search is a training project for the Rolling Scopes School React course.",
+    "author": "Author:",
+    "courseLink": "RS School React course"
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Page not found.",
+    "backToSearch": "Back to search"
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "fallback": "An unexpected error occurred.",
+    "tryAgain": "Try again"
+  }
+}

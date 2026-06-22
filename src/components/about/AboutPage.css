@@ -1,0 +1,30 @@
+.about-page {
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: 24px;
+  text-align: left;
+}
+
+.about-page__logo {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.about-page h1 {
+  margin: 0 0 16px;
+  color: var(--text-h);
+}
+
+.about-page__text,
+.about-page__author {
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.about-page__link {
+  color: var(--accent);
+}
+
+.about-page__link:hover {
+  text-decoration: underline;
+}
