@@ -1,4 +1,5 @@
 import type { SearchResultItem } from '../types/item';
+import { getPersonImageUrl } from './personImageUrl';
 
 const SWAPI_PEOPLE_URL = 'https://swapi.py4e.com/api/people/';
 const SWAPI_PAGE_SIZE = 10;
@@ -70,6 +71,7 @@ function personToItem(person: SwapiPerson): SearchResultItem {
     name: person.name,
     description,
     detailsUrl: person.url,
+    imageUrl: getPersonImageUrl(extractPersonId(person.url)),
   };
 }
 

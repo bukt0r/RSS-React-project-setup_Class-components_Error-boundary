@@ -1,0 +1,7 @@
+.person-image {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--social-bg);
+}

@@ -3,4 +3,5 @@ export interface SearchResultItem {
   name: string;
   description: string;
   detailsUrl: string;
+  imageUrl: string;
 }

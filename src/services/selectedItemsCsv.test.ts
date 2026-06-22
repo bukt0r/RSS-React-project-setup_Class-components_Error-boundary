@@ -12,6 +12,7 @@ const sampleItem: SearchResultItem = {
   name: 'Han Solo',
   description: 'Smuggler',
   detailsUrl: 'https://swapi.py4e.com/api/people/10/',
+  imageUrl: 'https://starwars-visualguide.com/assets/img/character/10.jpg',
 };
 
 describe('selectedItemsCsv', () => {

@@ -55,6 +55,7 @@ describe('swapiPeople service', () => {
           description:
             'Gender: male · Birth year: 19BBY · Height: 172 cm · Mass: 77 kg · Hair: blond',
           detailsUrl: 'https://swapi.py4e.com/api/people/1/',
+          imageUrl: 'https://starwars-visualguide.com/assets/img/character/1.jpg',
         },
       ],
       currentPage: 1,
@@ -133,6 +134,7 @@ describe('swapiPeople service', () => {
         description:
           'Gender: male · Birth year: 19BBY · Height: 172 cm · Mass: 77 kg · Hair: blond',
         detailsUrl: 'https://swapi.py4e.com/api/people/1/',
+        imageUrl: 'https://starwars-visualguide.com/assets/img/character/1.jpg',
       },
     ]);
   });
